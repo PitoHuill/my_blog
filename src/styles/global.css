@@ -63,3 +63,12 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Homepage profile portrait. The inline avatar placeholder remains as a fallback. */
+.avatar {
+  background-image: url('avatar.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: transparent !important;
+  font-size: 0 !important;
+}
