@@ -1,0 +1,4 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'; import { profile } from '../data/site';
+---
+<BaseLayout title="关于 · 你的名字" description={profile.tagline}><section class="shell about"><p class="eyebrow">ABOUT</p><h1>你好，我是{profile.name}。</h1><p class="lead">{profile.tagline}</p><div class="rule"></div><h2 id="now">Now</h2><p>{profile.now}</p><h2>这个网站</h2><p>这里是一个安静的个人空间，用来发布文章、项目与长期笔记。希望它既是对外的介绍，也能成为对内的工作台。</p><h2>联系</h2><p><a href={profile.github}>GitHub ↗</a>　<a href={`mailto:${profile.email}`}>{profile.email}</a></p></section></BaseLayout><style>.about{max-width:740px;padding-top:55px}.about h1{font:2.35rem/1.35 Georgia}.about h2{font:1.25rem Georgia;margin-top:2.5rem}.about p{line-height:2}.lead{color:var(--color-muted);font-size:1.1rem}.rule{border-top:1px solid var(--color-border);margin:2rem 0}</style>

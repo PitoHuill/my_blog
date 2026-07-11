@@ -1,0 +1,5 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'; import { projects } from '../../data/site';
+export function getStaticPaths(){return projects.map((project)=>({params:{slug:project.slug},props:{project}}));} const { project } = Astro.props;
+---
+<BaseLayout title={`${project.title} · 项目`} description={project.description}><article class="shell article"><a class="back" href="/projects/">← 全部项目</a><p class="eyebrow">{project.status}</p><h1>{project.title}</h1><div class="meta">{project.year}</div><p class="lead">{project.description}</p>{project.body.map((paragraph) => <p>{paragraph}</p>)}</article></BaseLayout><style>.article{max-width:740px;padding-top:54px}.back{font-size:.85rem}.article h1{font:2.35rem Georgia;margin:.7rem 0}.lead{color:var(--color-muted);border-left:2px solid var(--color-accent);padding-left:16px}.article p{line-height:2}</style>

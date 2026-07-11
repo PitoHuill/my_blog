@@ -1,0 +1,8 @@
+<button class="theme-toggle" type="button" aria-label="切换至日间主题" title="切换主题"><span aria-hidden="true">☾</span></button>
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const icon = button?.querySelector('span');
+  const setTheme = (theme: 'light' | 'dark') => { document.documentElement.dataset.theme = theme; localStorage.setItem('theme', theme); if (button && icon) { icon.textContent = theme === 'dark' ? '☀' : '☾'; button.setAttribute('aria-label', theme === 'dark' ? '切换至日间主题' : '切换至夜间主题'); } };
+  setTheme((document.documentElement.dataset.theme as 'light' | 'dark') || 'light');
+  button?.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+</script>

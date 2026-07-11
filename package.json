@@ -1,0 +1,17 @@
+{
+  "name": "astro-personal-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "astro": "^5.13.0",
+    "typescript": "^5.9.2"
+  }
+}
