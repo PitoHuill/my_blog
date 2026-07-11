@@ -13,6 +13,8 @@ npm run dev
 
 1. 创建 GitHub 仓库并将本项目推送到 `main` 或 `master`。
 2. 在仓库 **Settings → Pages** 选择 **GitHub Actions**。
-3. 在 Actions 环境变量中设置 `SITE_URL`（例如 `https://用户名.github.io`）。若使用项目仓库路径，再设置 `BASE_PATH`（例如 `/仓库名`）。
+3. 推送后工作流会自动识别仓库类型：`用户名.github.io` 使用根路径，普通项目仓库使用 `/仓库名` 路径，无需手动填写 `SITE_URL` 或 `BASE_PATH`。
+
+如果使用自定义域名，请在仓库的 Pages 设置中绑定域名，并将工作流中的 `SITE_URL` 改成你的域名。
 
 写作内容目前统一维护在 `src/data/site.ts`：替换个人资料、文章、项目与链接即可生成新页面。

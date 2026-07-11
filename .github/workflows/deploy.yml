@@ -25,6 +25,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Configure Astro site URL and base path
+        shell: bash
+        run: |
+          repository_name="${GITHUB_REPOSITORY#*/}"
+          if [[ "$repository_name" == "${GITHUB_REPOSITORY_OWNER}.github.io" ]]; then
+            base_path="/"
+          else
+            base_path="/$repository_name"
+          fi
+          echo "SITE_URL=https://${GITHUB_REPOSITORY_OWNER}.github.io" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$base_path" >> "$GITHUB_ENV"
       - name: Install dependencies
         run: npm ci
       - name: Build site
