@@ -1,7 +1,7 @@
 export type Post = { slug: string; title: string; date: string; tags: string[]; description: string; featured?: boolean; body: string[] };
 export type Project = { slug: string; title: string; year: string; status: string; description: string; body: string[] };
 
-export const profile = { name: '你的名字', tagline: '研究、创作与长期思考。', bio: '在这里记录值得留下的问题、工具与作品。', now: '正在整理阅读笔记，并打磨这个博客的第一批文章。', email: 'hello@example.com', github: 'https://github.com/' };
+export const profile = { name: 'pitohui', tagline: '研究、创作与长期思考。', bio: '在这里记录值得留下的问题、工具与作品。', now: '正在整理阅读笔记，并打磨这个博客的第一批文章。', email: 'katolevin**@gmail.com', github: 'https://github.com/PitoHuill' };
 
 export const posts: Post[] = [
   { slug: 'building-a-lasting-blog', title: '从零搭建一个可长期维护的个人博客', date: '2026-07-02', tags: ['Astro', '博客'], featured: true, description: '用清晰的内容结构与克制的界面，让写作成为长期可持续的事。', body: ['一个好的个人博客不需要复杂的功能。它应该先让你愿意写，然后让读者愿意停留。', '我把内容、页面和视觉系统分开：文章只负责表达，组件负责呈现，主题变量负责维持整体秩序。', '当每一部分都有清楚的边界，博客便会随着内容积累而自然生长。'] },
