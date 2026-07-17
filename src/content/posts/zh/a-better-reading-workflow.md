@@ -5,6 +5,8 @@ pubDate: 2026-05-28
 tags:
   - 阅读
   - 方法
+locale: zh
+translationKey: a-better-reading-workflow
 ---
 
 ## 从问题开始
