@@ -4,3 +4,5 @@ node_modules/
 dist/
 .npm-cache/
 .astro/
+test-results/
+playwright-report/
