@@ -7,11 +7,14 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "test:unit": "vitest run tests/unit",
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@astrojs/mdx": "^4.3.14",
     "@playwright/test": "^1.55.0",
     "astro": "^5.13.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,4 +1,24 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'; import { projects } from '../../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { projects } from '../../data/site';
+import { withBase } from '../../lib/paths';
 ---
-<BaseLayout title="项目 · 你的名字" description="持续进行中的作品"><section class="shell listing"><p class="eyebrow">PROJECTS</p><h1>项目</h1><p class="intro">一些正在生长、也允许变化的作品。</p>{projects.map((project) => <article class="entry card"><h2><a href={`/projects/${project.slug}/`}>{project.title}</a></h2><div class="meta">{project.year} · {project.status}</div><p>{project.description}</p></article>)}</section></BaseLayout><style>.listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro,.entry p{color:var(--color-muted)}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{line-height:1.65}</style>
+
+<BaseLayout title="项目 · 你的名字" description="持续进行中的作品">
+  <section class="shell listing">
+    <p class="eyebrow">PROJECTS</p>
+    <h1>项目</h1>
+    <p class="intro">一些正在生长、也允许变化的作品。</p>
+    {projects.map((project) => (
+      <article class="entry card">
+        <h2><a href={withBase(`projects/${project.slug}/`)}>{project.title}</a></h2>
+        <div class="meta">{project.year} · {project.status}</div>
+        <p>{project.description}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro,.entry p{color:var(--color-muted)}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{line-height:1.65}
+</style>

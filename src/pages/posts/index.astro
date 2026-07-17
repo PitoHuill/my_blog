@@ -1,6 +1,41 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'; import { posts } from '../../data/site';
-const tag = Astro.url.searchParams.get('tag'); const listed = tag ? posts.filter((post) => post.tags.includes(tag)) : posts;
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../data/site';
+import { getPublishedPosts } from '../../lib/posts';
+import { withBase } from '../../lib/paths';
+
+const posts = await getPublishedPosts();
+const selectedTag = Astro.url.searchParams.get('tag');
+const listed = selectedTag
+  ? posts.filter((post) => post.data.tags.includes(selectedTag))
+  : posts;
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const href = (path: string) => withBase(path);
 ---
-<BaseLayout title="文章 · 你的名字" description="写作与笔记"><section class="shell listing"><p class="eyebrow">WRITING</p><h1>{tag ? `标签：${tag}` : '文章'}</h1><p class="intro">长期记录那些值得反复思考的问题。</p><div class="tags"><a href="/posts/">全部</a>{[...new Set(posts.flatMap((post) => post.tags))].map((item) => <a href={`/posts/?tag=${encodeURIComponent(item)}`}>{item}</a>)}</div>{listed.map((post) => <article class="entry card"><h2><a href={`/posts/${post.slug}/`}>{post.title}</a></h2><div class="meta">{post.date}{post.tags.map((item) => <span class="tag">{item}</span>)}</div><p>{post.description}</p></article>)}</section></BaseLayout>
-<style>.listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro{color:var(--color-muted)}.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:24px 0}.tags a{border:1px solid var(--color-border);background:var(--color-soft);padding:.3rem .6rem;border-radius:3px;font-size:.8rem}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{color:var(--color-muted);font-size:.9rem;line-height:1.65}</style>
+
+<BaseLayout title={`文章 · ${profile.name}`} description="写作与笔记">
+  <section class="shell listing">
+    <p class="eyebrow">WRITING</p>
+    <h1>{selectedTag ? `标签：${selectedTag}` : '文章'}</h1>
+    <p class="intro">长期记录那些值得反复思考的问题。</p>
+    <div class="tags">
+      <a href={href('posts/')}>全部</a>
+      {tags.map((tag) => <a href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}
+    </div>
+    {listed.map((post) => (
+      <article class="entry card">
+        <h2><a href={href(`posts/${post.id}/`)}>{post.data.title}</a></h2>
+        <div class="meta">
+          {formatDate(post.data.pubDate)}
+          {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+        <p>{post.data.description}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro{color:var(--color-muted)}.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:24px 0}.tags a{border:1px solid var(--color-border);background:var(--color-soft);padding:.3rem .6rem;border-radius:3px;font-size:.8rem}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{color:var(--color-muted);font-size:.9rem;line-height:1.65}
+</style>
