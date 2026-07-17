@@ -1,0 +1,33 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+{items.length > 0 && (
+  <nav class="table-of-contents card" aria-label="文章目录">
+    <strong>目录</strong>
+    <ol>
+      {items.map((heading) => (
+        <li class:list={{ nested: heading.depth === 3 }}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .table-of-contents{margin:2rem 0;padding:16px 18px;border-left:2px solid var(--color-accent)}
+  .table-of-contents strong{font:1rem Georgia,"Noto Serif SC",serif}
+  .table-of-contents ol{list-style:none;margin:.7rem 0 0;padding:0}
+  .table-of-contents li{margin:.35rem 0;font-size:.86rem;line-height:1.5}
+  .table-of-contents li.nested{padding-left:1rem}
+  .table-of-contents a{color:var(--color-muted)}
+  .table-of-contents a:hover{color:var(--color-accent)}
+</style>

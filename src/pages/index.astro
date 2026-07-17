@@ -15,7 +15,7 @@ const href = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
   <div class="shell home-grid">
     <aside>
       <section class="profile card">
-        <div class="avatar">你</div>
+        <img class="avatar" src={`${base}avatar.jpg`} alt={`${profile.name} 的头像`} />
         <h1>{profile.name}</h1>
         <p>{profile.tagline}<br />{profile.bio}</p>
         <div class="social">
