@@ -17,10 +17,12 @@ describe('locale configuration', () => {
 });
 
 describe('shared UI dictionary', () => {
-  it('provides every shared label in both locales', () => {
-    expect(ui.en.navigation.home).toBeTruthy();
-    expect(ui.zh.navigation.home).toBeTruthy();
-    expect(ui.en.search.inputLabel).toBeTruthy();
-    expect(ui.zh.languageToggle.label).toBeTruthy();
+  it('provides a non-empty value for every shared label in both locales', () => {
+    const values = (dictionary: object): string[] => Object.values(dictionary)
+      .flatMap((value) => typeof value === 'string' ? [value] : values(value));
+
+    expect(values(ui.en)).not.toHaveLength(0);
+    expect(values(ui.zh)).toHaveLength(values(ui.en).length);
+    expect([...values(ui.en), ...values(ui.zh)].every((value) => value.trim().length > 0)).toBe(true);
   });
 });

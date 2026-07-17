@@ -6,6 +6,7 @@ import {
   getAdjacentPosts,
   getPublicSlug,
 } from '../../src/lib/post-utils';
+import { createGetPublishedPosts } from '../../src/lib/posts';
 
 type MockPost = {
   id: string;
@@ -81,6 +82,30 @@ describe('findTranslation', () => {
     const chinese = makePost('zh/example', '2026-07-10', false, 'zh', 'example');
 
     expect(findTranslation([english, chinese], english, 'zh')).toBe(chinese);
+  });
+});
+
+describe('getPublishedPosts', () => {
+  it('defaults to the English collection', async () => {
+    const getPublishedPosts = createGetPublishedPosts(async () => [
+      makePost('en/example', '2026-07-10', false, 'en'),
+      makePost('zh/example', '2026-07-10', false, 'zh'),
+    ]);
+    const posts = await getPublishedPosts();
+
+    expect(posts).toHaveLength(1);
+    expect(posts.every((post) => post.data.locale === 'en')).toBe(true);
+  });
+
+  it('continues to accept a legacy Date argument', async () => {
+    const getPublishedPosts = createGetPublishedPosts(async () => [
+      makePost('en/newer', '2026-07-10', false, 'en'),
+      makePost('en/older', '2026-06-01', false, 'en'),
+      makePost('zh/older', '2026-06-01', false, 'zh'),
+    ]);
+    const posts = await getPublishedPosts(new Date('2026-06-30T00:00:00Z'));
+
+    expect(posts.map((post) => post.id)).toEqual(['en/older']);
   });
 });
 
