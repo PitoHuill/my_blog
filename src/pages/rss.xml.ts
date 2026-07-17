@@ -1,3 +1,26 @@
 import type { APIRoute } from 'astro';
-import { posts } from '../data/site';
-export const GET: APIRoute = ({ site }) => new Response(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>你的名字</title><link>${site ?? ''}</link><description>个人博客</description>${posts.map((post) => `<item><title>${post.title}</title><link>${site ?? ''}posts/${post.slug}/</link><description>${post.description}</description><pubDate>${new Date(post.date).toUTCString()}</pubDate></item>`).join('')}</channel></rss>`, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } });
+import { profile } from '../data/site';
+import { getPublishedPosts } from '../lib/posts';
+
+const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (character) => ({
+  '<': '&lt;',
+  '>': '&gt;',
+  '&': '&amp;',
+  "'": '&apos;',
+  '"': '&quot;',
+})[character] ?? character);
+
+export const GET: APIRoute = async ({ site }) => {
+  const posts = await getPublishedPosts();
+  const siteUrl = site ?? new URL('https://example.github.io');
+  const base = import.meta.env.BASE_URL;
+  const items = posts.map((post) => {
+    const link = new URL(`${base}posts/${post.id}/`, siteUrl).toString();
+    return `<item><title>${escapeXml(post.data.title)}</title><link>${link}</link><description>${escapeXml(post.data.description)}</description><pubDate>${post.data.pubDate.toUTCString()}</pubDate></item>`;
+  }).join('');
+
+  return new Response(
+    `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${escapeXml(profile.name)}</title><link>${siteUrl}</link><description>${escapeXml(profile.tagline)}</description>${items}</channel></rss>`,
+    { headers: { 'Content-Type': 'application/xml; charset=utf-8' } },
+  );
+};

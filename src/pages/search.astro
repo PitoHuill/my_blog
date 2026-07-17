@@ -1,12 +1,54 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { posts } from '../data/site';
-const searchable = posts.map(({ slug, title, date, description, tags }) => ({ slug, title, date, description, tags }));
+import { profile } from '../data/site';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const searchable = posts.map((post) => ({
+  slug: post.id,
+  title: post.data.title,
+  date: post.data.pubDate.toISOString().slice(0, 10),
+  description: post.data.description,
+  tags: post.data.tags,
+}));
+const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="搜索 · 你的名字" description="搜索文章"><section class="shell search-page"><p class="eyebrow">SEARCH</p><h1>搜索文章</h1><label for="site-search">输入关键词</label><input id="site-search" type="search" placeholder="标题、摘要或标签" autocomplete="off" /><p id="result-count" class="meta">输入关键词开始搜索</p><div id="results"></div></section></BaseLayout>
-<script define:vars={{ searchable }}>
-  const input = document.querySelector('#site-search'); const results = document.querySelector('#results'); const count = document.querySelector('#result-count');
-  const escape = (text) => text.replace(/[&<>'"]/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[char]));
-  input?.addEventListener('input', () => { const query = input.value.trim().toLowerCase(); const matches = query ? searchable.filter((post) => `${post.title} ${post.description} ${post.tags.join(' ')}`.toLowerCase().includes(query)) : []; count.textContent = query ? `找到 ${matches.length} 篇文章` : '输入关键词开始搜索'; results.innerHTML = matches.map((post) => `<article class="result card"><h2><a href="/posts/${post.slug}/">${escape(post.title)}</a></h2><p class="meta">${post.date} · ${post.tags.map(escape).join(' / ')}</p><p>${escape(post.description)}</p></article>`).join(''); });
+
+<BaseLayout title={`搜索 · ${profile.name}`} description="搜索文章">
+  <section class="shell search-page">
+    <p class="eyebrow">SEARCH</p>
+    <h1>搜索文章</h1>
+    <label for="site-search">输入关键词</label>
+    <input id="site-search" type="search" placeholder="标题、摘要或标签" autocomplete="off" />
+    <p id="result-count" class="meta">输入关键词开始搜索</p>
+    <div id="results"></div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ searchable, base }}>
+  const input = document.querySelector('#site-search');
+  const results = document.querySelector('#results');
+  const count = document.querySelector('#result-count');
+  const escape = (text) => text.replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  })[character]);
+
+  input?.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase();
+    const matches = query
+      ? searchable.filter((post) => `${post.title} ${post.description} ${post.tags.join(' ')}`.toLowerCase().includes(query))
+      : [];
+    count.textContent = query ? `找到 ${matches.length} 篇文章` : '输入关键词开始搜索';
+    results.innerHTML = matches.map((post) => `
+      <article class="result card">
+        <h2><a href="${base}posts/${post.slug}/">${escape(post.title)}</a></h2>
+        <p class="meta">${post.date} · ${post.tags.map(escape).join(' / ')}</p>
+        <p>${escape(post.description)}</p>
+      </article>
+    `).join('');
+  });
 </script>
-<style>.search-page{max-width:760px;padding-top:55px}.search-page h1{font:2.2rem Georgia;margin:.35rem 0 1.5rem}.search-page label{display:block;font-size:.88rem;margin-bottom:.5rem}.search-page input{width:100%;padding:.85rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:6px;font:1rem system-ui}.search-page input:focus{border-color:var(--color-accent);outline:0}.search-page #result-count{margin:1rem 0}.result{padding:18px;margin:10px 0}.result h2{font:1.05rem Georgia;margin:0 0 .45rem}.result h2 a{color:var(--color-text)}.result p:last-child{color:var(--color-muted);line-height:1.6;margin:.5rem 0 0}</style>
+
+<style>
+  .search-page{max-width:760px;padding-top:55px}.search-page h1{font:2.2rem Georgia;margin:.35rem 0 1.5rem}.search-page label{display:block;font-size:.88rem;margin-bottom:.5rem}.search-page input{width:100%;padding:.85rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:6px;font:1rem system-ui}.search-page input:focus{border-color:var(--color-accent);outline:0}.search-page #result-count{margin:1rem 0}.result{padding:18px;margin:10px 0}.result h2{font:1.05rem Georgia;margin:0 0 .45rem}.result h2 a{color:var(--color-text)}.result p:last-child{color:var(--color-muted);line-height:1.6;margin:.5rem 0 0}
+</style>
