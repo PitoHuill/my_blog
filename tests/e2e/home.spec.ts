@@ -36,6 +36,35 @@ test('theme and language controls are available in both locales', async ({ page 
   await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveText('EN');
 });
 
+test('illustrated theme toggle synchronizes state, labels, persistence, and palette', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('theme', 'light'));
+  await page.reload();
+
+  const toggle = page.locator('.theme-toggle');
+  const track = toggle.locator('.theme-toggle__track');
+
+  await expect(toggle).toHaveAttribute('aria-label', 'Switch to dark theme');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await expect(track).toHaveCSS('width', '64px');
+  await expect(track).toHaveCSS('height', '30px');
+
+  await toggle.click();
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(toggle).toHaveAttribute('aria-label', 'Switch to light theme');
+  await expect(toggle).toHaveAttribute('title', 'Switch to light theme');
+  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('dark');
+  expect(await page.locator('html').evaluate((element) => (
+    getComputedStyle(element).getPropertyValue('--color-background').trim()
+  ))).toBe('#171b22');
+
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('button', { name: 'Switch to light theme' })).toHaveAttribute('aria-pressed', 'true');
+});
+
 test('search pages expose accessible language controls for equivalent routes', async ({ page }) => {
   await page.goto('/search/');
 
@@ -101,6 +130,8 @@ test('English header remains usable without horizontal overflow at 320px', async
   await expect(navigation).toBeVisible();
   await expect(themeControl).toBeVisible();
   await expect(languageControl).toBeVisible();
+  await expect(themeControl.locator('.theme-toggle__track')).toHaveCSS('width', '52px');
+  await expect(themeControl.locator('.theme-toggle__track')).toHaveCSS('height', '28px');
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 
   for (const element of [navigation, themeControl, languageControl]) {
