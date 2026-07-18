@@ -19,6 +19,7 @@ const counterpartLocale = locale === 'en' ? 'zh' : 'en';
 const searchPayload = serializeSearchPayload({
   searchable,
   locale,
+  resultSingular: labels.resultSingular,
   resultLabel: labels.results,
   initialMessage: labels.initialMessage,
 });
@@ -45,7 +46,7 @@ const searchPayload = serializeSearchPayload({
 <script>
   const payloadElement = document.querySelector('#search-data');
   const payload = JSON.parse(payloadElement?.textContent ?? 'null');
-  const { searchable, locale, resultLabel, initialMessage } = payload;
+  const { searchable, locale, resultSingular, resultLabel, initialMessage } = payload;
   const input = document.querySelector('#site-search');
   const results = document.querySelector('#results');
   const count = document.querySelector('#result-count');
@@ -77,7 +78,9 @@ const searchPayload = serializeSearchPayload({
         ? searchable.filter((post) => `${post.title} ${post.description} ${post.tags.join(' ')}`.toLowerCase().includes(query))
         : [];
       count.textContent = query
-        ? locale === 'en' ? `${matches.length} ${resultLabel}` : `找到 ${matches.length} ${resultLabel}`
+        ? locale === 'en'
+          ? `${matches.length} ${matches.length === 1 ? resultSingular : resultLabel}`
+          : `找到 ${matches.length} ${matches.length === 1 ? resultSingular : resultLabel}`
         : initialMessage;
       results.replaceChildren(...matches.map(createResult));
     });

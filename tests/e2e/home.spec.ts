@@ -53,7 +53,7 @@ test('search datasets, labels, results, and post links stay within the active lo
   const englishInput = page.getByRole('searchbox', { name: 'Enter a keyword' });
   await expect(englishInput).toHaveAttribute('placeholder', 'Title, description, or tag');
   await englishInput.fill('that lasts');
-  await expect(page.getByText('1 posts found')).toBeVisible();
+  await expect(page.getByText('1 post found')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveAttribute(
     'href',
     '/posts/building-a-lasting-blog/',
