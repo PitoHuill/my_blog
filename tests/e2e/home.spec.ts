@@ -36,6 +36,38 @@ test('theme and language controls are available in both locales', async ({ page 
   await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveText('EN');
 });
 
+test('disabled language control keeps explicit link semantics without a destination', async ({ page }) => {
+  await page.goto('/search/');
+
+  const languageControl = page.getByRole('link', { name: '切换到中文' });
+  await expect(languageControl).toHaveAttribute('aria-disabled', 'true');
+  await expect(languageControl).toHaveAttribute('tabindex', '-1');
+  await expect(languageControl).not.toHaveAttribute('href');
+});
+
+test('English header remains usable without horizontal overflow at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('/');
+
+  const header = page.locator('.site-header');
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  const themeControl = page.getByRole('button', { name: /switch to (dark|light) theme/i });
+  const languageControl = page.getByRole('link', { name: '切换到中文' });
+
+  await expect(header).toBeVisible();
+  await expect(navigation).toBeVisible();
+  await expect(themeControl).toBeVisible();
+  await expect(languageControl).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+
+  for (const element of [navigation, themeControl, languageControl]) {
+    const box = await element.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  }
+});
+
 test('language controls preserve equivalent home, post, project, and about routes', async ({ page }) => {
   const routes = [
     ['/', '/zh/', '切换到中文'],
@@ -62,7 +94,9 @@ test('paired article routes render matching authored content and locale-only nav
   await expect(page.getByText('Series: Astro Blog Practice · 1')).toBeVisible();
   await expect(page.locator('pre.astro-code')).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Article navigation' }).getByRole('link')).toHaveCount(2);
-  await expect(page.getByRole('navigation', { name: 'Article navigation' }).getByRole('link').first()).not.toHaveAttribute('href', /\/zh\//);
+  for (const link of await page.getByRole('navigation', { name: 'Article navigation' }).getByRole('link').all()) {
+    await expect(link).toHaveAttribute('href', /^\/posts\//);
+  }
 
   await page.goto('/zh/posts/building-a-lasting-blog/');
 
@@ -71,7 +105,9 @@ test('paired article routes render matching authored content and locale-only nav
   await expect(page.getByText(/阅读时间：\d+ 分钟/)).toBeVisible();
   await expect(page.getByText('系列：Astro 博客实践 · 第 1 篇')).toBeVisible();
   await expect(page.getByRole('navigation', { name: '文章导航' }).getByRole('link')).toHaveCount(2);
-  await expect(page.getByRole('navigation', { name: '文章导航' }).getByRole('link').first()).toHaveAttribute('href', /^\/zh\/posts\//);
+  for (const link of await page.getByRole('navigation', { name: '文章导航' }).getByRole('link').all()) {
+    await expect(link).toHaveAttribute('href', /^\/zh\/posts\//);
+  }
 });
 
 test('post and project listings are localized', async ({ page }) => {
@@ -137,5 +173,17 @@ test('documents expose locale, canonical URL, and complete alternate links', asy
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
     'https://example.github.io/zh/posts/building-a-lasting-blog/',
+  );
+  await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+    'href',
+    'https://example.github.io/posts/building-a-lasting-blog/',
+  );
+  await expect(page.locator('link[rel="alternate"][hreflang="zh-CN"]')).toHaveAttribute(
+    'href',
+    'https://example.github.io/zh/posts/building-a-lasting-blog/',
+  );
+  await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
+    'href',
+    'https://example.github.io/posts/building-a-lasting-blog/',
   );
 });

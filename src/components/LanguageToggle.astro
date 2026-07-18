@@ -21,8 +21,10 @@ const visibleLabel = locale === 'en' ? '中' : 'EN';
 ) : (
   <span
     class="language-toggle is-disabled"
+    role="link"
     aria-label={targetLabel}
     aria-disabled="true"
+    tabindex="-1"
     title={targetLabel}
   >
     {visibleLabel}
