@@ -11,8 +11,6 @@ interface Props { locale: Locale }
 const { locale } = Astro.props;
 const labels = ui[locale];
 const posts = await getPublishedPosts(locale);
-const selectedTag = Astro.url.searchParams.get('tag');
-const listed = selectedTag ? posts.filter((post) => post.data.tags.includes(selectedTag)) : posts;
 const tags = [...new Set(posts.flatMap((post) => post.data.tags))];
 const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 const href = (path: string) => localizedPath(path, locale);
@@ -25,16 +23,20 @@ const href = (path: string) => localizedPath(path, locale);
   canonicalPath={href('posts/')}
   counterpartUrl={localizedPath('posts/', locale === 'en' ? 'zh' : 'en')}
 >
-  <section class="shell listing">
+  <section class="shell listing post-listing">
     <p class="eyebrow">{locale === 'en' ? 'WRITING' : '写作'}</p>
-    <h1>{selectedTag ? `${labels.posts.tags}: ${selectedTag}` : labels.posts.title}</h1>
+    <h1
+      id="posts-heading"
+      data-default-title={labels.posts.title}
+      data-tag-prefix={`${labels.posts.tags}${locale === 'en' ? ': ' : '：'}`}
+    >{labels.posts.title}</h1>
     <p class="intro">{labels.posts.description}</p>
     <div class="tags">
-      <a href={href('posts/')}>{locale === 'en' ? 'All' : '全部'}</a>
-      {tags.map((tag) => <a href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`}>{tag}</a>)}
+      <a href={href('posts/')} data-filter-tag="">{locale === 'en' ? 'All' : '全部'}</a>
+      {tags.map((tag) => <a href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`} data-filter-tag={tag}>{tag}</a>)}
     </div>
-    {listed.map((post) => (
-      <article class="entry card">
+    {posts.map((post) => (
+      <article class="entry card" data-post-entry data-tags={JSON.stringify(post.data.tags)}>
         <h2><a href={href(`posts/${getPublicSlug(post.id)}/`)}>{post.data.title}</a></h2>
         <div class="meta">
           {formatDate(post.data.pubDate)}
@@ -45,6 +47,28 @@ const href = (path: string) => localizedPath(path, locale);
     ))}
   </section>
 </BaseLayout>
+
+<script>
+  const listing = document.querySelector('.post-listing');
+  const heading = listing?.querySelector('#posts-heading');
+  const selectedTag = new URLSearchParams(window.location.search).get('tag') ?? '';
+
+  if (listing && heading instanceof HTMLElement) {
+    const defaultTitle = heading.dataset.defaultTitle ?? '';
+    const tagPrefix = heading.dataset.tagPrefix ?? '';
+    heading.textContent = selectedTag ? `${tagPrefix}${selectedTag}` : defaultTitle;
+
+    listing.querySelectorAll<HTMLElement>('[data-post-entry]').forEach((entry) => {
+      const tags = JSON.parse(entry.dataset.tags ?? '[]');
+      entry.hidden = Boolean(selectedTag) && !tags.includes(selectedTag);
+    });
+
+    listing.querySelectorAll<HTMLAnchorElement>('[data-filter-tag]').forEach((link) => {
+      if ((link.dataset.filterTag ?? '') === selectedTag) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+</script>
 
 <style>
   .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro{color:var(--color-muted)}.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:24px 0}.tags a{border:1px solid var(--color-border);background:var(--color-soft);padding:.3rem .6rem;border-radius:3px;font-size:.8rem}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{color:var(--color-muted);font-size:.9rem;line-height:1.65}

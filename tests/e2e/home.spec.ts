@@ -186,6 +186,18 @@ test('post and project listings are localized', async ({ page }) => {
   await expect(page.getByRole('link', { name: '个人知识花园' })).toBeVisible();
 });
 
+test('tag query filters work on prerendered English and Chinese post listings', async ({ page }) => {
+  await page.goto('/posts/?tag=Blogging');
+  await expect(page.getByRole('heading', { level: 1, name: 'Tags: Blogging' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Smaller Systems for Longer Thinking' })).toBeHidden();
+
+  await page.goto('/zh/posts/?tag=%E5%8D%9A%E5%AE%A2');
+  await expect(page.getByRole('heading', { level: 1, name: '标签：博客' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '从零搭建一个可长期维护的个人博客' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '用更小的系统，完成更长的思考' })).toBeHidden();
+});
+
 test('project and about pages render locale-specific data', async ({ page }) => {
   await page.goto('/projects/knowledge-garden/');
   await expect(page.getByRole('heading', { level: 1, name: 'Personal Knowledge Garden' })).toBeVisible();
