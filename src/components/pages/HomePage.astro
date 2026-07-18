@@ -1,10 +1,12 @@
 ---
+import { Image } from 'astro:assets';
+import avatar from '../../assets/avatar.jpg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { profile, projects } from '../../data/site';
 import type { Locale } from '../../i18n/config';
 import { ui } from '../../i18n/ui';
 import { getPublicSlug, getPublishedPosts } from '../../lib/posts';
-import { localizedPath, withBase } from '../../lib/paths';
+import { localizedPath } from '../../lib/paths';
 
 interface Props { locale: Locale }
 
@@ -29,7 +31,16 @@ const canonicalPath = href('');
   <div class="shell home-grid">
     <aside>
       <section class="profile card">
-        <img class="avatar" src={withBase('avatar.jpg')} alt={locale === 'en' ? `${profile.name}'s avatar` : `${profile.name} 的头像`} />
+        <Image
+          class="avatar"
+          src={avatar}
+          alt={locale === 'en' ? `${profile.name}'s avatar` : `${profile.name} 的头像`}
+          width={72}
+          height={72}
+          densities={[1, 2]}
+          layout="fixed"
+          priority
+        />
         <h1>{profile.name}</h1>
         <p>{profile.tagline[locale]}<br />{profile.bio[locale]}</p>
         <div class="social">

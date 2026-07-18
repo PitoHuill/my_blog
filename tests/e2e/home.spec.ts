@@ -24,6 +24,18 @@ test('English and Chinese home pages render localized navigation and profile cop
   await expect(page.getByText('在这里记录值得留下的问题、工具与作品。')).toBeVisible();
 });
 
+test('profile avatar is emitted as an optimized fixed Astro image', async ({ page }) => {
+  await page.goto('/');
+
+  const avatar = page.getByRole('img', { name: "Pitohui's avatar" });
+  await expect(avatar).toHaveAttribute('data-astro-image', 'fixed');
+  await expect(avatar).toHaveAttribute('width', '72');
+  await expect(avatar).toHaveAttribute('height', '72');
+  await expect(avatar).toHaveAttribute('sizes', '72px');
+  await expect(avatar).toHaveAttribute('srcset', /72w,.+144w/);
+  await expect(avatar).toHaveAttribute('fetchpriority', 'high');
+});
+
 test('theme and language controls are available in both locales', async ({ page }) => {
   await page.goto('/');
 
