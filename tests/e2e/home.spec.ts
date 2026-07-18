@@ -48,6 +48,7 @@ test('search pages expose accessible language controls for equivalent routes', a
 
 test('search datasets, labels, results, and post links stay within the active locale', async ({ page }) => {
   await page.goto('/search/');
+  await expect(page.locator('.search-page .eyebrow')).toHaveText('SEARCH');
   await expect(page.getByRole('heading', { level: 1, name: 'Search posts' })).toBeVisible();
   const englishInput = page.getByRole('searchbox', { name: 'Enter a keyword' });
   await expect(englishInput).toHaveAttribute('placeholder', 'Title, description, or tag');
@@ -60,6 +61,7 @@ test('search datasets, labels, results, and post links stay within the active lo
   await expect(page.getByText('从零搭建一个可长期维护的个人博客')).toHaveCount(0);
 
   await page.goto('/zh/search/');
+  await expect(page.locator('.search-page .eyebrow')).toHaveText('搜索');
   await expect(page.getByRole('heading', { level: 1, name: '搜索文章' })).toBeVisible();
   const chineseInput = page.getByRole('searchbox', { name: '输入关键词' });
   await expect(chineseInput).toHaveAttribute('placeholder', '标题、摘要或标签');

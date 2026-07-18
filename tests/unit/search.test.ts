@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSearchIndex } from '../../src/lib/search';
+import { buildSearchIndex, serializeSearchPayload } from '../../src/lib/search';
 
 const posts = [
   {
@@ -40,5 +40,21 @@ describe('buildSearchIndex', () => {
     expect(index.map((entry) => entry.url)).toEqual(['/my_blog/zh/posts/lasting-blog/']);
     expect(JSON.stringify(index)).not.toContain('A lasting blog');
     expect(JSON.stringify(index)).not.toContain('/my_blog/my_blog/');
+  });
+});
+
+describe('serializeSearchPayload', () => {
+  it('prevents mixed-case script termination while preserving the authored data', () => {
+    const attack = '</SCRIPT><img src=x onerror=alert(1)>';
+    const payload = {
+      searchable: [{ title: attack, description: `Before ${attack} after` }],
+      locale: 'en',
+    };
+
+    const serialized = serializeSearchPayload(payload);
+
+    expect(serialized).not.toContain('<');
+    expect(serialized).toContain('\\u003c/SCRIPT>\\u003cimg');
+    expect(JSON.parse(serialized)).toEqual(payload);
   });
 });

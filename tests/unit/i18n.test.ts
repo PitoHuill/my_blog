@@ -25,4 +25,9 @@ describe('shared UI dictionary', () => {
     expect(values(ui.zh)).toHaveLength(values(ui.en).length);
     expect([...values(ui.en), ...values(ui.zh)].every((value) => value.trim().length > 0)).toBe(true);
   });
+
+  it('localizes the visible search eyebrow', () => {
+    expect(ui.en.search.eyebrow).toBe('SEARCH');
+    expect(ui.zh.search.eyebrow).toBe('搜索');
+  });
 });

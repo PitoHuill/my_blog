@@ -21,6 +21,10 @@ export type SearchEntry = {
   url: string;
 };
 
+export function serializeSearchPayload(payload: unknown): string {
+  return (JSON.stringify(payload) ?? 'null').replace(/</g, '\\u003c');
+}
+
 export function buildSearchIndex(
   posts: readonly SearchablePost[],
   locale: Locale,

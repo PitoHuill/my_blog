@@ -54,4 +54,21 @@ describe('renderLocalizedRss', () => {
     expect(xml).not.toContain('A lasting blog');
     expect(xml).not.toContain('/my_blog/my_blog/');
   });
+
+  it('XML-escapes special characters in channel and item link text', () => {
+    const specialCharacterPost = {
+      ...posts[0],
+      id: 'en/lasting&blog',
+    };
+
+    const xml = renderLocalizedRss([specialCharacterPost], {
+      locale: 'en',
+      siteUrl: new URL('https://example.github.io'),
+      base: '/my&blog/',
+    });
+
+    expect(xml).toContain('<link>https://example.github.io/my&amp;blog/</link>');
+    expect(xml).toContain('<link>https://example.github.io/my&amp;blog/posts/lasting&amp;blog/</link>');
+    expect(xml).not.toContain('<link>https://example.github.io/my&blog/</link>');
+  });
 });

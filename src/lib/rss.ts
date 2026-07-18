@@ -38,10 +38,10 @@ export function renderLocalizedRss(
     .map((post) => {
       const path = localizedPath(`posts/${getPublicSlug(post.id)}/`, locale, base);
       const link = new URL(path, siteUrl).toString();
-      return `<item><title>${escapeXml(post.data.title)}</title><link>${link}</link><description>${escapeXml(post.data.description)}</description><pubDate>${post.data.pubDate.toUTCString()}</pubDate></item>`;
+      return `<item><title>${escapeXml(post.data.title)}</title><link>${escapeXml(link)}</link><description>${escapeXml(post.data.description)}</description><pubDate>${post.data.pubDate.toUTCString()}</pubDate></item>`;
     })
     .join('');
 
   const title = `${profile.name} — ${ui[locale].posts.title}`;
-  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${escapeXml(title)}</title><link>${channelLink}</link><description>${escapeXml(profile.tagline[locale])}</description>${items}</channel></rss>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${escapeXml(title)}</title><link>${escapeXml(channelLink)}</link><description>${escapeXml(profile.tagline[locale])}</description>${items}</channel></rss>`;
 }
