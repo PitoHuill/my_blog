@@ -36,13 +36,54 @@ test('theme and language controls are available in both locales', async ({ page 
   await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveText('EN');
 });
 
-test('disabled language control keeps explicit link semantics without a destination', async ({ page }) => {
+test('search pages expose accessible language controls for equivalent routes', async ({ page }) => {
   await page.goto('/search/');
 
   const languageControl = page.getByRole('link', { name: '切换到中文' });
-  await expect(languageControl).toHaveAttribute('aria-disabled', 'true');
-  await expect(languageControl).toHaveAttribute('tabindex', '-1');
-  await expect(languageControl).not.toHaveAttribute('href');
+  await expect(languageControl).toHaveAttribute('href', '/zh/search/');
+
+  await page.goto('/zh/search/');
+  await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveAttribute('href', '/search/');
+});
+
+test('search datasets, labels, results, and post links stay within the active locale', async ({ page }) => {
+  await page.goto('/search/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Search posts' })).toBeVisible();
+  const englishInput = page.getByRole('searchbox', { name: 'Enter a keyword' });
+  await expect(englishInput).toHaveAttribute('placeholder', 'Title, description, or tag');
+  await englishInput.fill('that lasts');
+  await expect(page.getByText('1 posts found')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveAttribute(
+    'href',
+    '/posts/building-a-lasting-blog/',
+  );
+  await expect(page.getByText('从零搭建一个可长期维护的个人博客')).toHaveCount(0);
+
+  await page.goto('/zh/search/');
+  await expect(page.getByRole('heading', { level: 1, name: '搜索文章' })).toBeVisible();
+  const chineseInput = page.getByRole('searchbox', { name: '输入关键词' });
+  await expect(chineseInput).toHaveAttribute('placeholder', '标题、摘要或标签');
+  await chineseInput.fill('可长期维护');
+  await expect(page.getByText('找到 1 篇文章')).toBeVisible();
+  await expect(page.getByRole('link', { name: '从零搭建一个可长期维护的个人博客' })).toHaveAttribute(
+    'href',
+    '/zh/posts/building-a-lasting-blog/',
+  );
+  await expect(page.getByText('Building a Personal Blog That Lasts')).toHaveCount(0);
+});
+
+test('English and Chinese RSS feeds contain only their locale', async ({ request }) => {
+  const englishFeed = await (await request.get('/rss.xml')).text();
+  expect(englishFeed).toContain('<title>Pitohui — Posts</title>');
+  expect(englishFeed).toContain('Building a Personal Blog That Lasts');
+  expect(englishFeed).not.toContain('从零搭建一个可长期维护的个人博客');
+  expect(englishFeed).toContain('https://example.github.io/posts/building-a-lasting-blog/');
+
+  const chineseFeed = await (await request.get('/zh/rss.xml')).text();
+  expect(chineseFeed).toContain('<title>Pitohui — 文章</title>');
+  expect(chineseFeed).toContain('从零搭建一个可长期维护的个人博客');
+  expect(chineseFeed).not.toContain('Building a Personal Blog That Lasts');
+  expect(chineseFeed).toContain('https://example.github.io/zh/posts/building-a-lasting-blog/');
 });
 
 test('English header remains usable without horizontal overflow at 320px', async ({ page }) => {
@@ -71,6 +112,7 @@ test('English header remains usable without horizontal overflow at 320px', async
 test('language controls preserve equivalent home, post, project, and about routes', async ({ page }) => {
   const routes = [
     ['/', '/zh/', '切换到中文'],
+    ['/search/', '/zh/search/', '切换到中文'],
     ['/posts/building-a-lasting-blog/', '/zh/posts/building-a-lasting-blog/', '切换到中文'],
     ['/projects/knowledge-garden/', '/zh/projects/knowledge-garden/', '切换到中文'],
     ['/about/', '/zh/about/', '切换到中文'],
@@ -82,6 +124,20 @@ test('language controls preserve equivalent home, post, project, and about route
 
     await page.goto(chineseRoute);
     await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveAttribute('href', englishRoute);
+  }
+});
+
+test('representative localized pages contain no doubled or broken internal links', async ({ page, request }) => {
+  for (const route of ['/', '/search/', '/zh/', '/zh/search/']) {
+    await page.goto(route);
+    const hrefs = await page.locator('a[href^="/"]').evaluateAll((links) => (
+      links.map((link) => link.getAttribute('href')).filter((href): href is string => Boolean(href))
+    ));
+
+    for (const href of new Set(hrefs)) {
+      expect(href).not.toMatch(/\/zh\/zh\/|\/my_blog\/my_blog\//);
+      expect((await request.get(href)).ok(), `Expected ${href} from ${route} to resolve`).toBe(true);
+    }
   }
 });
 

@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { localizedPath } from '../../lib/paths';
+import { getPublishedPosts } from '../../lib/posts';
+import { buildSearchIndex } from '../../lib/search';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const labels = ui[locale].search;
+const posts = await getPublishedPosts(locale);
+const searchable = buildSearchIndex(posts, locale);
+const counterpartLocale = locale === 'en' ? 'zh' : 'en';
+---
+
+<BaseLayout
+  title={`${labels.title} · ${profile.name}`}
+  description={labels.description}
+  locale={locale}
+  canonicalPath={localizedPath('search/', locale)}
+  counterpartUrl={localizedPath('search/', counterpartLocale)}
+>
+  <section class="shell search-page">
+    <p class="eyebrow">SEARCH</p>
+    <h1>{labels.title}</h1>
+    <label for="site-search">{labels.inputLabel}</label>
+    <input id="site-search" type="search" placeholder={labels.placeholder} autocomplete="off" />
+    <p id="result-count" class="meta">{labels.initialMessage}</p>
+    <div id="results"></div>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ searchable, locale, resultLabel: labels.results, initialMessage: labels.initialMessage }}>
+  const input = document.querySelector('#site-search');
+  const results = document.querySelector('#results');
+  const count = document.querySelector('#result-count');
+
+  const createResult = (post) => {
+    const article = document.createElement('article');
+    article.className = 'result card';
+
+    const heading = document.createElement('h2');
+    const link = document.createElement('a');
+    link.href = post.url;
+    link.textContent = post.title;
+    heading.append(link);
+
+    const meta = document.createElement('p');
+    meta.className = 'meta';
+    meta.textContent = `${post.date} · ${post.tags.join(' / ')}`;
+
+    const description = document.createElement('p');
+    description.textContent = post.description;
+    article.append(heading, meta, description);
+    return article;
+  };
+
+  if (input instanceof HTMLInputElement && results && count) {
+    input.addEventListener('input', () => {
+      const query = input.value.trim().toLowerCase();
+      const matches = query
+        ? searchable.filter((post) => `${post.title} ${post.description} ${post.tags.join(' ')}`.toLowerCase().includes(query))
+        : [];
+      count.textContent = query
+        ? locale === 'en' ? `${matches.length} ${resultLabel}` : `找到 ${matches.length} ${resultLabel}`
+        : initialMessage;
+      results.replaceChildren(...matches.map(createResult));
+    });
+  }
+</script>
+
+<style>
+  .search-page{max-width:760px;padding-top:55px}.search-page h1{font:2.2rem Georgia;margin:.35rem 0 1.5rem}.search-page label{display:block;font-size:.88rem;margin-bottom:.5rem}.search-page input{width:100%;padding:.85rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:6px;font:1rem system-ui}.search-page input:focus{border-color:var(--color-accent);outline:0}.search-page #result-count{margin:1rem 0}.result{padding:18px;margin:10px 0}.result h2{font:1.05rem Georgia;margin:0 0 .45rem}.result h2 a{color:var(--color-text)}.result p:last-child{color:var(--color-muted);line-height:1.6;margin:.5rem 0 0}
+</style>
