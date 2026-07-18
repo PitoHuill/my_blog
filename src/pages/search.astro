@@ -15,7 +15,12 @@ const searchable = posts.map((post) => ({
 const base = withBase('');
 ---
 
-<BaseLayout title={`搜索 · ${profile.name}`} description="搜索文章">
+<BaseLayout
+  title={`搜索 · ${profile.name}`}
+  description="搜索文章"
+  locale="en"
+  canonicalPath={withBase('search/')}
+>
   <section class="shell search-page">
     <p class="eyebrow">SEARCH</p>
     <h1>搜索文章</h1>

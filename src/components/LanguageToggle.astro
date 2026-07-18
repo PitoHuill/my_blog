@@ -1,0 +1,36 @@
+---
+import type { Locale } from '../i18n/config';
+import { ui } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  counterpartUrl?: string;
+}
+
+const { locale, counterpartUrl } = Astro.props;
+const targetLabel = locale === 'en'
+  ? ui.en.languageToggle.switchToChinese
+  : ui.zh.languageToggle.switchToEnglish;
+const visibleLabel = locale === 'en' ? '中' : 'EN';
+---
+
+{counterpartUrl ? (
+  <a class="language-toggle" href={counterpartUrl} aria-label={targetLabel} title={targetLabel}>
+    {visibleLabel}
+  </a>
+) : (
+  <span
+    class="language-toggle is-disabled"
+    aria-label={targetLabel}
+    aria-disabled="true"
+    title={targetLabel}
+  >
+    {visibleLabel}
+  </span>
+)}
+
+<style>
+  .language-toggle{display:grid;place-items:center;min-width:2rem;height:2rem;margin-left:.2rem;border-radius:.4rem;color:var(--color-text);font-size:.82rem;font-weight:700}
+  a.language-toggle:hover{background:var(--color-soft)}
+  .language-toggle.is-disabled{color:var(--color-muted);cursor:not-allowed;opacity:.55}
+</style>

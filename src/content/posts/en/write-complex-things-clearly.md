@@ -1,5 +1,5 @@
 ---
-title: Reading Notes: Writing Complex Things More Clearly
+title: "Reading Notes: Writing Complex Things More Clearly"
 description: Keep generous space and a steady reading rhythm so the content remains the visual center.
 pubDate: 2026-06-19
 tags:

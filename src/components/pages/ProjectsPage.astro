@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile, projects } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { localizedPath } from '../../lib/paths';
+
+interface Props { locale: Locale }
+
+const { locale } = Astro.props;
+const labels = ui[locale].projects;
+const href = (path: string) => localizedPath(path, locale);
+---
+
+<BaseLayout
+  title={`${labels.title} · ${profile.name}`}
+  description={labels.description}
+  locale={locale}
+  canonicalPath={href('projects/')}
+  counterpartUrl={localizedPath('projects/', locale === 'en' ? 'zh' : 'en')}
+>
+  <section class="shell listing">
+    <p class="eyebrow">{locale === 'en' ? 'PROJECTS' : '项目'}</p>
+    <h1>{labels.title}</h1>
+    <p class="intro">{labels.description}</p>
+    {projects.map((project) => (
+      <article class="entry card">
+        <h2><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h2>
+        <div class="meta">{project.year} · {project.status[locale]}</div>
+        <p>{project.description[locale]}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro,.entry p{color:var(--color-muted)}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{line-height:1.65}
+</style>

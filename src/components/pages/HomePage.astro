@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile, projects } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { getPublicSlug, getPublishedPosts } from '../../lib/posts';
+import { localizedPath, withBase } from '../../lib/paths';
+
+interface Props { locale: Locale }
+
+const { locale } = Astro.props;
+const labels = ui[locale];
+const posts = await getPublishedPosts(locale);
+const featured = posts.find((post) => post.data.featured);
+const recent = posts.filter((post) => !post.data.featured).slice(0, 3);
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const href = (path: string) => localizedPath(path, locale);
+const counterpartUrl = localizedPath('', locale === 'en' ? 'zh' : 'en');
+const canonicalPath = href('');
+---
+
+<BaseLayout
+  title={`${profile.name} · ${locale === 'en' ? 'Personal Blog' : '个人博客'}`}
+  description={profile.tagline[locale]}
+  locale={locale}
+  canonicalPath={canonicalPath}
+  counterpartUrl={counterpartUrl}
+>
+  <div class="shell home-grid">
+    <aside>
+      <section class="profile card">
+        <img class="avatar" src={withBase('avatar.jpg')} alt={locale === 'en' ? `${profile.name}'s avatar` : `${profile.name} 的头像`} />
+        <h1>{profile.name}</h1>
+        <p>{profile.tagline[locale]}<br />{profile.bio[locale]}</p>
+        <div class="social">
+          <a href={profile.github}>GitHub ↗</a>
+          <a href={`mailto:${profile.email}`}>{labels.home.email} ↗</a>
+        </div>
+      </section>
+      <section class="stats card">
+        <div><b>{posts.length}</b><span>{labels.home.posts}</span></div>
+        <div><b>{projects.length}</b><span>{labels.home.projects}</span></div>
+        <div><b>3</b><span>{labels.home.works}</span></div>
+      </section>
+      <section class="sidebar-card card">
+        <h2>{labels.home.links}</h2>
+        <a href={href('about/')}>{labels.home.aboutMe} →</a>
+        <a href={href('projects/')}>{labels.home.allProjects} →</a>
+        <a href={href('rss.xml')}>{labels.home.rss} →</a>
+      </section>
+    </aside>
+
+    <section class="home-main">
+      {featured && (
+        <>
+          <div class="section-heading">{labels.home.featuredPosts}</div>
+          <article class="post-card feature card">
+            <span class="eyebrow">{labels.home.featured.toUpperCase()}</span>
+            <h2><a href={href(`posts/${getPublicSlug(featured.id)}/`)}>{featured.data.title}</a></h2>
+            <div class="meta">
+              {formatDate(featured.data.pubDate)}
+              {featured.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+            </div>
+            <p>{featured.data.description}</p>
+          </article>
+        </>
+      )}
+
+      <a class="now card" href={href('about/#now')}>
+        <b>{labels.home.now}</b><span>{profile.now[locale]}</span><em>→</em>
+      </a>
+
+      <div class="section-heading">
+        {labels.home.latestPosts} <a href={href('posts/')}>{labels.home.allPosts} →</a>
+      </div>
+      {recent.map((post) => (
+        <article class="post-card card">
+          <h2><a href={href(`posts/${getPublicSlug(post.id)}/`)}>{post.data.title}</a></h2>
+          <div class="meta">
+            {formatDate(post.data.pubDate)}
+            {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+          <p>{post.data.description}</p>
+        </article>
+      ))}
+
+      <div class="section-heading project-heading">
+        {labels.home.projects} <a href={href('projects/')}>{labels.home.allProjects} →</a>
+      </div>
+      {projects.slice(0, 2).map((project) => (
+        <article class="post-card card">
+          <h2><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h2>
+          <div class="meta">{project.year} · {project.status[locale]}</div>
+          <p>{project.description[locale]}</p>
+        </article>
+      ))}
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .home-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:32px;padding-top:34px}.profile,.sidebar-card{padding:22px}.avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;margin:auto;background:linear-gradient(140deg,var(--color-accent),var(--color-soft));color:white;font-family:Georgia}.profile h1{text-align:center;font:1.3rem Georgia;margin:12px 0 8px}.profile p{color:var(--color-muted);font-size:.85rem;line-height:1.7;text-align:center}.social{display:flex;justify-content:center;gap:14px;font-size:.8rem}.stats{display:grid;grid-template-columns:repeat(3,1fr);padding:17px;margin-top:14px;text-align:center}.stats b{display:block;color:var(--color-accent);font:1.35rem Georgia}.stats span{font-size:.75rem;color:var(--color-muted)}.sidebar-card{margin-top:14px}.sidebar-card h2{font:1rem Georgia;margin:0 0 .6rem}.sidebar-card a{display:block;padding:.45rem 0;font-size:.85rem}.post-card{padding:20px 21px;margin-bottom:13px;transition:transform .2s,border-color .2s}.post-card:hover{transform:translateY(-2px);border-color:var(--color-accent)}.post-card h2{margin:.1rem 0 .65rem;font:1.08rem/1.45 Georgia,"Noto Serif SC",serif}.post-card h2 a{color:var(--color-text)}.post-card p{margin:.8rem 0 0;color:var(--color-muted);font-size:.88rem;line-height:1.7}.feature h2{font-size:1.25rem}.now{display:flex;gap:13px;align-items:center;padding:15px 18px;margin:25px 0;border-left:2px solid var(--color-accent);color:var(--color-muted);font-size:.88rem}.now b{color:var(--color-text);font-family:Georgia}.now em{margin-left:auto;color:var(--color-accent);font-style:normal}.project-heading{margin-top:32px}@media(max-width:767px){.home-grid{grid-template-columns:1fr;padding-top:20px}.home-grid aside{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile{grid-column:1/-1}.stats,.sidebar-card{margin:0}}
+</style>

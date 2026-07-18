@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile, type Project } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { localizedPath } from '../../lib/paths';
+
+interface Props { locale: Locale; project: Project }
+
+const { locale, project } = Astro.props;
+const labels = ui[locale].projects;
+const href = (path: string) => localizedPath(path, locale);
+const targetLocale: Locale = locale === 'en' ? 'zh' : 'en';
+---
+
+<BaseLayout
+  title={`${project.title[locale]} · ${labels.title} · ${profile.name}`}
+  description={project.description[locale]}
+  locale={locale}
+  canonicalPath={href(`projects/${project.slug}/`)}
+  counterpartUrl={localizedPath(`projects/${project.slug}/`, targetLocale)}
+>
+  <article class="shell article">
+    <a class="back" href={href('projects/')}>← {labels.backToProjects}</a>
+    <p class="eyebrow">{project.status[locale]}</p>
+    <h1>{project.title[locale]}</h1>
+    <div class="meta">{project.year} · {labels.status}: {project.status[locale]}</div>
+    <p class="lead">{project.description[locale]}</p>
+    {project.body[locale].map((paragraph) => <p>{paragraph}</p>)}
+  </article>
+</BaseLayout>
+
+<style>
+  .article{max-width:740px;padding-top:54px}.back{font-size:.85rem}.article h1{font:2.35rem Georgia;margin:.7rem 0}.lead{color:var(--color-muted);border-left:2px solid var(--color-accent);padding-left:16px}.article p{line-height:2}
+</style>

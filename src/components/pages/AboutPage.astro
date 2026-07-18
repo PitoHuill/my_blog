@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { localizedPath } from '../../lib/paths';
+
+interface Props { locale: Locale }
+
+const { locale } = Astro.props;
+const labels = ui[locale].about;
+const siteCopy = locale === 'en'
+  ? 'This is a quiet personal space for publishing essays, projects, and long-term notes. I hope it can serve as both a public introduction and a private workbench.'
+  : '这里是一个安静的个人空间，用来发布文章、项目与长期笔记。希望它既是对外的介绍，也能成为对内的工作台。';
+const href = (path: string) => localizedPath(path, locale);
+---
+
+<BaseLayout
+  title={`${labels.title} · ${profile.name}`}
+  description={profile.tagline[locale]}
+  locale={locale}
+  canonicalPath={href('about/')}
+  counterpartUrl={localizedPath('about/', locale === 'en' ? 'zh' : 'en')}
+>
+  <section class="shell about">
+    <p class="eyebrow">{locale === 'en' ? 'ABOUT' : '关于'}</p>
+    <h1>{labels.greeting} {profile.name}{locale === 'en' ? '.' : '。'}</h1>
+    <p class="lead">{profile.tagline[locale]}</p>
+    <div class="rule"></div>
+    <h2 id="now">{labels.now}</h2>
+    <p>{profile.now[locale]}</p>
+    <h2>{labels.site}</h2>
+    <p>{siteCopy}</p>
+    <h2>{labels.contact}</h2>
+    <p><a href={profile.github}>GitHub ↗</a>　<a href={`mailto:${profile.email}`}>{profile.email}</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .about{max-width:740px;padding-top:55px}.about h1{font:2.35rem/1.35 Georgia}.about h2{font:1.25rem Georgia;margin-top:2.5rem}.about p{line-height:2}.lead{color:var(--color-muted);font-size:1.1rem}.rule{border-top:1px solid var(--color-border);margin:2rem 0}
+</style>
