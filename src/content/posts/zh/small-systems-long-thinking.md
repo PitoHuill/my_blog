@@ -5,6 +5,8 @@ pubDate: 2026-07-11
 tags:
   - 工具
   - 随笔
+locale: zh
+translationKey: small-systems-long-thinking
 ---
 
 ## 工具应该减少摩擦

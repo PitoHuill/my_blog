@@ -1,9 +1,23 @@
-import { getCollection, type CollectionEntry } from 'astro:content';
-import { filterPublishedPosts } from './post-utils';
+import type { CollectionEntry } from 'astro:content';
+import { defaultLocale, type Locale } from '../i18n/config';
+import { filterPublishedPosts, type PublishablePost } from './post-utils';
 
-export { calculateReadingTime, getAdjacentPosts } from './post-utils';
+export { calculateReadingTime, findTranslation, getAdjacentPosts, getPublicSlug } from './post-utils';
 
-export async function getPublishedPosts(now = new Date()): Promise<CollectionEntry<'posts'>[]> {
-  const posts = await getCollection('posts');
-  return filterPublishedPosts(posts, now);
+export function createGetPublishedPosts<T extends PublishablePost>(loadPosts: () => Promise<readonly T[]>) {
+  async function getPublishedPosts(): Promise<T[]>;
+  async function getPublishedPosts(now: Date): Promise<T[]>;
+  async function getPublishedPosts(locale: Locale, now?: Date): Promise<T[]>;
+  async function getPublishedPosts(localeOrNow: Locale | Date = defaultLocale, now = new Date()): Promise<T[]> {
+    const locale = localeOrNow instanceof Date ? defaultLocale : localeOrNow;
+    const effectiveNow = localeOrNow instanceof Date ? localeOrNow : now;
+    return filterPublishedPosts(await loadPosts(), locale, effectiveNow);
+  }
+
+  return getPublishedPosts;
 }
+
+export const getPublishedPosts = createGetPublishedPosts(async (): Promise<CollectionEntry<'posts'>[]> => {
+  const { getCollection } = await import('astro:content');
+  return getCollection('posts');
+});

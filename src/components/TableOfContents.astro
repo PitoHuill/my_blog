@@ -1,17 +1,19 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import type { Locale } from '../i18n/config';
 
 interface Props {
   headings: MarkdownHeading[];
+  locale: Locale;
 }
 
-const { headings } = Astro.props;
+const { headings, locale } = Astro.props;
 const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 ---
 
 {items.length > 0 && (
-  <nav class="table-of-contents card" aria-label="文章目录">
-    <strong>目录</strong>
+  <nav class="table-of-contents card" aria-label={locale === 'en' ? 'Table of contents' : '文章目录'}>
+    <strong>{locale === 'en' ? 'Contents' : '目录'}</strong>
     <ol>
       {items.map((heading) => (
         <li class:list={{ nested: heading.depth === 3 }}>

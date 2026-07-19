@@ -4,6 +4,8 @@ description: 保留留白与稳定的阅读节奏，让内容始终成为视觉�
 pubDate: 2026-06-19
 tags:
   - 阅读
+locale: zh
+translationKey: write-complex-things-clearly
 ---
 
 ## 清楚不等于简单

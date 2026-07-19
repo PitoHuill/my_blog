@@ -14,6 +14,8 @@ const posts = defineCollection({
     series: z.string().min(1).optional(),
     seriesOrder: z.number().int().positive().optional(),
     heroImage: z.string().min(1).optional(),
+    locale: z.enum(['en', 'zh']),
+    translationKey: z.string().min(1),
   }),
 });
 

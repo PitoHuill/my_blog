@@ -1,10 +1,10 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import PostPage from '../../components/pages/PostPage.astro';
-import { getPublicSlug, getPublishedPosts } from '../../lib/posts';
+import PostPage from '../../../components/pages/PostPage.astro';
+import { getPublicSlug, getPublishedPosts } from '../../../lib/posts';
 
 export async function getStaticPaths() {
-  const [posts, translations] = await Promise.all([getPublishedPosts('en'), getPublishedPosts('zh')]);
+  const [posts, translations] = await Promise.all([getPublishedPosts('zh'), getPublishedPosts('en')]);
   const allPosts = [...posts, ...translations];
   return posts.map((post) => ({
     params: { slug: getPublicSlug(post.id) },
@@ -21,4 +21,4 @@ interface Props {
 const { post, posts, allPosts } = Astro.props;
 ---
 
-<PostPage locale="en" post={post} posts={posts} allPosts={allPosts} />
+<PostPage locale="zh" post={post} posts={posts} allPosts={allPosts} />

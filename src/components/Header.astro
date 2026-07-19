@@ -1,6 +1,31 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import LanguageToggle from './LanguageToggle.astro';
 import { profile } from '../data/site';
-import { withBase } from '../lib/paths';
+import type { Locale } from '../i18n/config';
+import { ui } from '../i18n/ui';
+import { localizedPath } from '../lib/paths';
+
+interface Props {
+  locale: Locale;
+  counterpartUrl?: string;
+}
+
+const { locale, counterpartUrl } = Astro.props;
+const labels = ui[locale].navigation;
+const href = (path: string) => localizedPath(path, locale);
 ---
-<header class="site-header"><div class="shell header-inner"><a class="brand" href={withBase('')}><span>◒</span>{profile.name}</a><nav aria-label="主导航"><a href={withBase('')}>首页</a><a href={withBase('posts/')}>文章</a><a href={withBase('projects/')}>项目</a><a href={withBase('about/')}>关于</a></nav><ThemeToggle /></div></header>
+
+<header class="site-header">
+  <div class="shell header-inner">
+    <a class="brand" href={href('')}><span>◒</span>{profile.name}</a>
+    <nav aria-label={locale === 'en' ? 'Primary navigation' : '主导航'}>
+      <a href={href('')}>{labels.home}</a>
+      <a href={href('posts/')}>{labels.posts}</a>
+      <a href={href('projects/')}>{labels.projects}</a>
+      <a href={href('about/')}>{labels.about}</a>
+    </nav>
+    <ThemeToggle locale={locale} />
+    <LanguageToggle locale={locale} counterpartUrl={counterpartUrl} />
+  </div>
+</header>

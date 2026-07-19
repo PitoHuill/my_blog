@@ -8,6 +8,8 @@ tags:
 featured: true
 series: Astro 博客实践
 seriesOrder: 1
+locale: zh
+translationKey: building-a-lasting-blog
 ---
 
 ## 为什么选择静态博客
