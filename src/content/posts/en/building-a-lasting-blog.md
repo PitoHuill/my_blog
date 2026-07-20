@@ -7,6 +7,7 @@ tags:
   - Blogging
 featured: true
 series: Astro Blog Practice
+seriesKey: astro-blog-practice
 seriesOrder: 1
 locale: en
 translationKey: building-a-lasting-blog

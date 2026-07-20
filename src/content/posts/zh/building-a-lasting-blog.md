@@ -7,6 +7,7 @@ tags:
   - 博客
 featured: true
 series: Astro 博客实践
+seriesKey: astro-blog-practice
 seriesOrder: 1
 locale: zh
 translationKey: building-a-lasting-blog

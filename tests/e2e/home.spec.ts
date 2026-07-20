@@ -300,3 +300,42 @@ test('documents expose locale, canonical URL, and complete alternate links', asy
     'https://example.github.io/posts/building-a-lasting-blog/',
   );
 });
+
+test('series hubs and related posts are bilingual and cross-linked', async ({ page }) => {
+  await page.goto('/series/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Article series' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Astro Blog Practice' })).toHaveAttribute(
+    'href',
+    '/series/astro-blog-practice/',
+  );
+
+  await page.goto('/series/astro-blog-practice/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Astro Blog Practice' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveAttribute(
+    'href',
+    '/posts/building-a-lasting-blog/',
+  );
+  await expect(page.getByRole('link', { name: '切换到中文' })).toHaveAttribute(
+    'href',
+    '/zh/series/astro-blog-practice/',
+  );
+
+  await page.goto('/zh/series/astro-blog-practice/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Astro 博客实践' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '从零搭建一个可长期维护的个人博客' })).toHaveAttribute(
+    'href',
+    '/zh/posts/building-a-lasting-blog/',
+  );
+
+  await page.goto('/posts/building-a-lasting-blog/');
+  await expect(page.getByRole('link', { name: 'Series: Astro Blog Practice · 1' })).toHaveAttribute(
+    'href',
+    '/series/astro-blog-practice/',
+  );
+  const related = page.getByRole('region', { name: 'Continue reading' });
+  await expect(related.getByRole('link')).toHaveCount(3);
+  await expect(related.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveCount(0);
+  for (const link of await related.getByRole('link').all()) {
+    await expect(link).toHaveAttribute('href', /^\/posts\//);
+  }
+});

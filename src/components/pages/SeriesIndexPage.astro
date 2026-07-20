@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../data/site';
+import type { Locale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import { getPostSeries } from '../../lib/posts';
+import { localizedPath } from '../../lib/paths';
+
+interface Props {
+  locale: Locale;
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { locale, posts } = Astro.props;
+const labels = ui[locale].series;
+const series = getPostSeries(posts);
+const href = (path: string) => localizedPath(path, locale);
+const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+const articleLabel = (count: number) => count === 1 ? labels.article : labels.articles;
+---
+
+<BaseLayout
+  title={`${labels.title} · ${profile.name}`}
+  description={labels.description}
+  locale={locale}
+  canonicalPath={href('series/')}
+  counterpartUrl={localizedPath('series/', locale === 'en' ? 'zh' : 'en')}
+>
+  <section class="shell series-index">
+    <p class="eyebrow">{labels.eyebrow}</p>
+    <div class="series-intro">
+      <div>
+        <h1>{labels.title}</h1>
+        <p>{labels.description}</p>
+      </div>
+      <span>{series.length} {series.length === 1 ? labels.collection : labels.collections}</span>
+    </div>
+
+    <div class="series-grid">
+      {series.map((item) => (
+        <article class="series-card card">
+          <div class="series-card__meta">
+            <span>{item.posts.length} {articleLabel(item.posts.length)}</span>
+            <span>{labels.latestUpdate} · {formatDate(item.latestDate)}</span>
+          </div>
+          <h2><a href={href(`series/${item.key}/`)}>{item.title}</a></h2>
+          <p>{item.posts[0].data.description}</p>
+          <ol>
+            {item.posts.slice(0, 3).map((post) => <li>{post.data.title}</li>)}
+          </ol>
+          <a class="series-card__link" href={href(`series/${item.key}/`)}>
+            {labels.chapters} →
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .series-index{max-width:900px;padding-top:55px}.series-intro{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:30px}.series-intro h1{font:2.2rem Georgia,"Noto Serif SC",serif;margin:.35rem 0}.series-intro p{max-width:580px;color:var(--color-muted);margin-bottom:0}.series-intro>span{white-space:nowrap;color:var(--color-accent);font:1rem Georgia,"Noto Serif SC",serif}.series-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.series-card{padding:24px;display:flex;flex-direction:column;min-height:270px}.series-card__meta{display:flex;justify-content:space-between;gap:12px;color:var(--color-muted);font-size:.76rem}.series-card h2{font:1.35rem/1.4 Georgia,"Noto Serif SC",serif;margin:1.1rem 0 .65rem}.series-card h2 a{color:var(--color-text)}.series-card>p{color:var(--color-muted);font-size:.88rem;line-height:1.7;margin:0}.series-card ol{padding-left:1.25rem;margin:1.1rem 0;color:var(--color-muted);font-size:.82rem;line-height:1.7}.series-card__link{margin-top:auto;font-size:.84rem}@media(max-width:700px){.series-index{padding-top:32px}.series-intro{align-items:start;flex-direction:column}.series-grid{grid-template-columns:1fr}.series-card{min-height:0}}
+</style>

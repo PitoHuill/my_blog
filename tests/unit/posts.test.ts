@@ -4,7 +4,9 @@ import {
   filterPublishedPosts,
   findTranslation,
   getAdjacentPosts,
+  getPostSeries,
   getPublicSlug,
+  getRelatedPosts,
 } from '../../src/lib/post-utils';
 import { createGetPublishedPosts } from '../../src/lib/posts';
 
@@ -18,6 +20,9 @@ type MockPost = {
     draft: boolean;
     locale: 'en' | 'zh';
     translationKey: string;
+    series?: string;
+    seriesKey?: string;
+    seriesOrder?: number;
   };
   body: string;
 };
@@ -131,5 +136,38 @@ describe('getAdjacentPosts', () => {
 
     expect(result.previous?.id).toBe('oldest');
     expect(result.next?.id).toBe('newest');
+  });
+});
+
+describe('getPostSeries', () => {
+  it('groups posts by stable key and orders chapters by series order', () => {
+    const second = makePost('en/second', '2026-07-10');
+    Object.assign(second.data, { series: 'Astro Blog Practice', seriesKey: 'astro-blog-practice', seriesOrder: 2 });
+    const first = makePost('en/first', '2026-07-01');
+    Object.assign(first.data, { series: 'Astro Blog Practice', seriesKey: 'astro-blog-practice', seriesOrder: 1 });
+    const standalone = makePost('en/standalone', '2026-07-12');
+
+    const result = getPostSeries([second, standalone, first]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('astro-blog-practice');
+    expect(result[0].posts.map((post) => post.id)).toEqual(['en/first', 'en/second']);
+    expect(result[0].latestDate).toEqual(new Date('2026-07-10'));
+  });
+});
+
+describe('getRelatedPosts', () => {
+  it('ranks the same series ahead of shared tags and uses recency as a tiebreaker', () => {
+    const current = makePost('en/current', '2026-07-01');
+    Object.assign(current.data, { tags: ['Astro'], series: 'Astro Blog Practice', seriesKey: 'astro-blog-practice' });
+    const sameSeries = makePost('en/same-series', '2026-05-01');
+    Object.assign(sameSeries.data, { series: 'Astro Blog Practice', seriesKey: 'astro-blog-practice' });
+    const sharedTag = makePost('en/shared-tag', '2026-07-12');
+    sharedTag.data.tags = ['Astro'];
+    const recentFallback = makePost('en/recent-fallback', '2026-07-15');
+
+    const result = getRelatedPosts([recentFallback, sharedTag, current, sameSeries], current, 3);
+
+    expect(result.map((post) => post.id)).toEqual(['en/same-series', 'en/shared-tag', 'en/recent-fallback']);
   });
 });

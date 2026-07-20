@@ -31,6 +31,7 @@ const href = (path: string) => localizedPath(path, locale);
       data-tag-prefix={`${labels.posts.tags}${locale === 'en' ? ': ' : '：'}`}
     >{labels.posts.title}</h1>
     <p class="intro">{labels.posts.description}</p>
+    <a class="series-link" href={href('series/')}>{labels.posts.browseSeries} →</a>
     <div class="tags">
       <a href={href('posts/')} data-filter-tag="">{locale === 'en' ? 'All' : '全部'}</a>
       {tags.map((tag) => <a href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`} data-filter-tag={tag}>{tag}</a>)}
@@ -71,5 +72,5 @@ const href = (path: string) => localizedPath(path, locale);
 </script>
 
 <style>
-  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro{color:var(--color-muted)}.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:24px 0}.tags a{border:1px solid var(--color-border);background:var(--color-soft);padding:.3rem .6rem;border-radius:3px;font-size:.8rem}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{color:var(--color-muted);font-size:.9rem;line-height:1.65}
+  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro{color:var(--color-muted)}.series-link{display:inline-block;margin-top:.2rem;font-size:.86rem}.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:24px 0}.tags a{border:1px solid var(--color-border);background:var(--color-soft);padding:.3rem .6rem;border-radius:3px;font-size:.8rem}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{color:var(--color-muted);font-size:.9rem;line-height:1.65}
 </style>

@@ -1,0 +1,8 @@
+---
+import SeriesIndexPage from '../../components/pages/SeriesIndexPage.astro';
+import { getPublishedPosts } from '../../lib/posts';
+
+const posts = await getPublishedPosts('en');
+---
+
+<SeriesIndexPage locale="en" posts={posts} />
