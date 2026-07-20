@@ -115,6 +115,21 @@ test('search datasets, labels, results, and post links stay within the active lo
   await expect(page.getByText('Building a Personal Blog That Lasts')).toHaveCount(0);
 });
 
+test('dynamic search results keep compact card typography and responsive metadata', async ({ page }) => {
+  await page.goto('/zh/search/');
+  await page.getByRole('searchbox', { name: '输入关键词' }).fill('可长期维护');
+
+  const result = page.locator('#results .result').first();
+  await expect(result).toBeVisible();
+  await expect(result.locator('h2')).toHaveCSS('font-size', '17.28px');
+  await expect(result.locator('.result__date')).toHaveText('2026-07-02');
+  await expect(result.locator('.result__tag')).toHaveText(['Astro', '博客']);
+  await expect(result.locator('.result__description')).toHaveCSS('font-size', '14.08px');
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test('English and Chinese RSS feeds contain only their locale', async ({ request }) => {
   const englishFeed = await (await request.get('/rss.xml')).text();
   expect(englishFeed).toContain('<title>Pitohui — Posts</title>');
