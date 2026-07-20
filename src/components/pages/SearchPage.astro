@@ -37,7 +37,7 @@ const searchPayload = serializeSearchPayload({
     <h1>{labels.title}</h1>
     <label for="site-search">{labels.inputLabel}</label>
     <input id="site-search" type="search" placeholder={labels.placeholder} autocomplete="off" />
-    <p id="result-count" class="meta">{labels.initialMessage}</p>
+    <p id="result-count" class="meta" aria-live="polite">{labels.initialMessage}</p>
     <div id="results"></div>
     <script id="search-data" type="application/json" set:html={searchPayload}></script>
   </section>
@@ -61,11 +61,29 @@ const searchPayload = serializeSearchPayload({
     link.textContent = post.title;
     heading.append(link);
 
-    const meta = document.createElement('p');
-    meta.className = 'meta';
-    meta.textContent = `${post.date} · ${post.tags.join(' / ')}`;
+    const meta = document.createElement('div');
+    meta.className = 'result__meta';
+
+    const date = document.createElement('time');
+    date.className = 'result__date';
+    date.dateTime = post.date;
+    date.textContent = post.date;
+    meta.append(date);
+
+    if (post.tags.length > 0) {
+      const tags = document.createElement('div');
+      tags.className = 'result__tags';
+      for (const tag of post.tags) {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'result__tag';
+        tagElement.textContent = tag;
+        tags.append(tagElement);
+      }
+      meta.append(tags);
+    }
 
     const description = document.createElement('p');
+    description.className = 'result__description';
     description.textContent = post.description;
     article.append(heading, meta, description);
     return article;
@@ -87,6 +105,6 @@ const searchPayload = serializeSearchPayload({
   }
 </script>
 
-<style>
-  .search-page{max-width:760px;padding-top:55px}.search-page h1{font:2.2rem Georgia;margin:.35rem 0 1.5rem}.search-page label{display:block;font-size:.88rem;margin-bottom:.5rem}.search-page input{width:100%;padding:.85rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:6px;font:1rem system-ui}.search-page input:focus{border-color:var(--color-accent);outline:0}.search-page #result-count{margin:1rem 0}.result{padding:18px;margin:10px 0}.result h2{font:1.05rem Georgia;margin:0 0 .45rem}.result h2 a{color:var(--color-text)}.result p:last-child{color:var(--color-muted);line-height:1.6;margin:.5rem 0 0}
+<style is:global>
+  .search-page{max-width:760px;padding-top:55px}.search-page h1{font:2.2rem Georgia,"Noto Serif SC",serif;margin:.35rem 0 1.5rem}.search-page label{display:block;font-size:.88rem;margin-bottom:.5rem}.search-page input{width:100%;padding:.85rem 1rem;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);border-radius:6px;font:1rem system-ui;transition:border-color .2s,box-shadow .2s}.search-page input:focus{border-color:var(--color-accent);outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--color-accent) 14%,transparent)}.search-page #result-count{margin:1rem 0 1.15rem}.search-page #results{display:grid;gap:12px}.search-page .result{padding:19px 21px;min-width:0;transition:transform .2s,border-color .2s,box-shadow .2s}.search-page .result:hover{transform:translateY(-2px);border-color:var(--color-accent);box-shadow:0 8px 24px color-mix(in srgb,var(--color-text) 6%,transparent)}.search-page .result h2{font:1.08rem/1.45 Georgia,"Noto Serif SC",serif;margin:0 0 .65rem;overflow-wrap:anywhere}.search-page .result h2 a{color:var(--color-text)}.search-page .result h2 a:hover{color:var(--color-accent)}.search-page .result__meta{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem .7rem;color:var(--color-muted);font-size:.78rem}.search-page .result__date{font-variant-numeric:tabular-nums}.search-page .result__tags{display:flex;flex-wrap:wrap;gap:.35rem}.search-page .result__tag{padding:.14rem .42rem;background:var(--color-soft);border:1px solid var(--color-border);border-radius:3px;line-height:1.35}.search-page .result__description{color:var(--color-muted);font-size:.88rem;line-height:1.7;margin:.75rem 0 0;max-width:66ch}@media(max-width:600px){.search-page{padding-top:32px}.search-page h1{font-size:1.8rem}.search-page .result{padding:16px}.search-page .result h2{font-size:1rem}.search-page .result__description{font-size:.84rem}}
 </style>

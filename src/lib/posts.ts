@@ -2,7 +2,14 @@ import type { CollectionEntry } from 'astro:content';
 import { defaultLocale, type Locale } from '../i18n/config';
 import { filterPublishedPosts, type PublishablePost } from './post-utils';
 
-export { calculateReadingTime, findTranslation, getAdjacentPosts, getPublicSlug } from './post-utils';
+export {
+  calculateReadingTime,
+  findTranslation,
+  getAdjacentPosts,
+  getPostSeries,
+  getPublicSlug,
+  getRelatedPosts,
+} from './post-utils';
 
 export function createGetPublishedPosts<T extends PublishablePost>(loadPosts: () => Promise<readonly T[]>) {
   async function getPublishedPosts(): Promise<T[]>;

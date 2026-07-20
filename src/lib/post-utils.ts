@@ -10,6 +10,24 @@ export type PublishablePost = {
   };
 };
 
+export type DiscoverablePost = PublishablePost & {
+  data: PublishablePost['data'] & {
+    title: string;
+    description: string;
+    tags: string[];
+    series?: string;
+    seriesKey?: string;
+    seriesOrder?: number;
+  };
+};
+
+export type PostSeries<T extends DiscoverablePost> = {
+  key: string;
+  title: string;
+  posts: T[];
+  latestDate: Date;
+};
+
 export function filterPublishedPosts<T extends PublishablePost>(posts: readonly T[], now?: Date): T[];
 export function filterPublishedPosts<T extends PublishablePost>(posts: readonly T[], locale: Locale, now?: Date): T[];
 export function filterPublishedPosts<T extends PublishablePost>(posts: readonly T[], localeOrNow: Locale | Date = new Date(), maybeNow = new Date()): T[] {
@@ -46,4 +64,45 @@ export function getAdjacentPosts<T extends { id: string }>(posts: readonly T[], 
     previous: posts[index + 1],
     next: posts[index - 1],
   };
+}
+
+export function getPostSeries<T extends DiscoverablePost>(posts: readonly T[]): PostSeries<T>[] {
+  const groups = new Map<string, T[]>();
+
+  for (const post of posts) {
+    if (!post.data.series || !post.data.seriesKey) continue;
+    const group = groups.get(post.data.seriesKey) ?? [];
+    group.push(post);
+    groups.set(post.data.seriesKey, group);
+  }
+
+  return [...groups.entries()]
+    .map(([key, seriesPosts]) => {
+      const orderedPosts = [...seriesPosts].sort((a, b) => {
+        const orderDifference = (a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER) - (b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER);
+        return orderDifference || a.data.pubDate.getTime() - b.data.pubDate.getTime();
+      });
+      return {
+        key,
+        title: orderedPosts[0].data.series!,
+        posts: orderedPosts,
+        latestDate: new Date(Math.max(...orderedPosts.map((post) => post.data.pubDate.getTime()))),
+      };
+    })
+    .sort((a, b) => b.latestDate.getTime() - a.latestDate.getTime());
+}
+
+export function getRelatedPosts<T extends DiscoverablePost>(posts: readonly T[], current: T, limit = 3): T[] {
+  const currentTags = new Set(current.data.tags);
+
+  return posts
+    .filter((post) => post.id !== current.id)
+    .map((post) => {
+      const sharedTags = post.data.tags.filter((tag) => currentTags.has(tag)).length;
+      const sameSeries = Boolean(current.data.seriesKey && post.data.seriesKey === current.data.seriesKey);
+      return { post, score: (sameSeries ? 100 : 0) + sharedTags * 10 };
+    })
+    .sort((a, b) => b.score - a.score || b.post.data.pubDate.getTime() - a.post.data.pubDate.getTime())
+    .slice(0, limit)
+    .map(({ post }) => post);
 }

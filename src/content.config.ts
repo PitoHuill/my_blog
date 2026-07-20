@@ -12,6 +12,7 @@ const posts = defineCollection({
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
     series: z.string().min(1).optional(),
+    seriesKey: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).optional(),
     seriesOrder: z.number().int().positive().optional(),
     heroImage: z.string().min(1).optional(),
     locale: z.enum(['en', 'zh']),

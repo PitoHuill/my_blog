@@ -115,6 +115,21 @@ test('search datasets, labels, results, and post links stay within the active lo
   await expect(page.getByText('Building a Personal Blog That Lasts')).toHaveCount(0);
 });
 
+test('dynamic search results keep compact card typography and responsive metadata', async ({ page }) => {
+  await page.goto('/zh/search/');
+  await page.getByRole('searchbox', { name: '输入关键词' }).fill('可长期维护');
+
+  const result = page.locator('#results .result').first();
+  await expect(result).toBeVisible();
+  await expect(result.locator('h2')).toHaveCSS('font-size', '17.28px');
+  await expect(result.locator('.result__date')).toHaveText('2026-07-02');
+  await expect(result.locator('.result__tag')).toHaveText(['Astro', '博客']);
+  await expect(result.locator('.result__description')).toHaveCSS('font-size', '14.08px');
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
 test('English and Chinese RSS feeds contain only their locale', async ({ request }) => {
   const englishFeed = await (await request.get('/rss.xml')).text();
   expect(englishFeed).toContain('<title>Pitohui — Posts</title>');
@@ -299,4 +314,43 @@ test('documents expose locale, canonical URL, and complete alternate links', asy
     'href',
     'https://example.github.io/posts/building-a-lasting-blog/',
   );
+});
+
+test('series hubs and related posts are bilingual and cross-linked', async ({ page }) => {
+  await page.goto('/series/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Article series' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Astro Blog Practice' })).toHaveAttribute(
+    'href',
+    '/series/astro-blog-practice/',
+  );
+
+  await page.goto('/series/astro-blog-practice/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Astro Blog Practice' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveAttribute(
+    'href',
+    '/posts/building-a-lasting-blog/',
+  );
+  await expect(page.getByRole('link', { name: '切换到中文' })).toHaveAttribute(
+    'href',
+    '/zh/series/astro-blog-practice/',
+  );
+
+  await page.goto('/zh/series/astro-blog-practice/');
+  await expect(page.getByRole('heading', { level: 1, name: 'Astro 博客实践' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '从零搭建一个可长期维护的个人博客' })).toHaveAttribute(
+    'href',
+    '/zh/posts/building-a-lasting-blog/',
+  );
+
+  await page.goto('/posts/building-a-lasting-blog/');
+  await expect(page.getByRole('link', { name: 'Series: Astro Blog Practice · 1' })).toHaveAttribute(
+    'href',
+    '/series/astro-blog-practice/',
+  );
+  const related = page.getByRole('region', { name: 'Continue reading' });
+  await expect(related.getByRole('link')).toHaveCount(3);
+  await expect(related.getByRole('link', { name: 'Building a Personal Blog That Lasts' })).toHaveCount(0);
+  for (const link of await related.getByRole('link').all()) {
+    await expect(link).toHaveAttribute('href', /^\/posts\//);
+  }
 });

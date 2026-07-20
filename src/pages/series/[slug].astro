@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SeriesPage from '../../components/pages/SeriesPage.astro';
+import type { PostSeries } from '../../lib/post-utils';
+import { getPostSeries, getPublishedPosts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const [posts, translations] = await Promise.all([getPublishedPosts('en'), getPublishedPosts('zh')]);
+  const translatedKeys = new Set(getPostSeries(translations).map((series) => series.key));
+  return getPostSeries(posts).map((series) => ({
+    params: { slug: series.key },
+    props: { series, hasCounterpart: translatedKeys.has(series.key) },
+  }));
+}
+
+interface Props {
+  series: PostSeries<CollectionEntry<'posts'>>;
+  hasCounterpart: boolean;
+}
+
+const { series, hasCounterpart } = Astro.props;
+---
+
+<SeriesPage locale="en" series={series} hasCounterpart={hasCounterpart} />
