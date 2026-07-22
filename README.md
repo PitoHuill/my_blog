@@ -9,6 +9,10 @@ npm install
 npm run dev
 ```
 
+## 桌面管理器
+
+Windows 桌面端位于 `desktop/`，用于编辑双语文章、首页资料、真实预览和安全发布。开发与打包说明见 `desktop/README.md`。
+
 ## 发布到 GitHub Pages
 
 1. 创建 GitHub 仓库并将本项目推送到 `main` 或 `master`。
