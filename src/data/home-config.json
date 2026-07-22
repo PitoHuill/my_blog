@@ -1,0 +1,25 @@
+{
+  "mainSections": [
+    {
+      "id": "featured",
+      "visible": true
+    },
+    {
+      "id": "now",
+      "visible": true
+    },
+    {
+      "id": "latest",
+      "visible": true
+    },
+    {
+      "id": "projects",
+      "visible": true
+    }
+  ],
+  "sidebar": {
+    "links": true,
+    "profile": true,
+    "stats": true
+  }
+}

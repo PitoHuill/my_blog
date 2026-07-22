@@ -6,3 +6,6 @@ dist/
 .astro/
 test-results/
 playwright-report/
+target/
+*.tsbuildinfo
+desktop/src-tauri/gen/schemas/
