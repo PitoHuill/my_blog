@@ -26,8 +26,8 @@ describe('shared UI dictionary', () => {
     expect([...values(ui.en), ...values(ui.zh)].every((value) => value.trim().length > 0)).toBe(true);
   });
 
-  it('localizes the visible search eyebrow', () => {
-    expect(ui.en.search.eyebrow).toBe('SEARCH');
-    expect(ui.zh.search.eyebrow).toBe('搜索');
+  it('localizes the search empty state', () => {
+    expect(ui.en.search.noResults).toBe('No posts found');
+    expect(ui.zh.search.noResults).toBe('没有找到文章');
   });
 });

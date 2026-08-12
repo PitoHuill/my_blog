@@ -7,6 +7,7 @@ import { PreviewModal } from './components/PreviewModal';
 import { PublishCenter } from './components/PublishCenter';
 import { Sidebar, type AppSection } from './components/Sidebar';
 import { api } from './lib/api';
+import { getErrorMessage } from './lib/errors';
 import type { BlogInfo } from './types';
 
 const ROOT_KEY = 'blog-publisher:root';
@@ -21,6 +22,7 @@ export default function App() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
+  const [workspaceDirty, setWorkspaceDirty] = useState(false);
 
   const refreshInfo = useCallback(async (candidate = root) => {
     if (!candidate) return;
@@ -32,8 +34,7 @@ export default function App() {
       setRoot(next.root);
       localStorage.setItem(ROOT_KEY, next.root);
     } catch (reason) {
-      setInfo(null);
-      setError(String(reason));
+      setError(getErrorMessage(reason, '无法读取博客状态'));
     } finally {
       setLoading(false);
     }
@@ -43,9 +44,32 @@ export default function App() {
     if (root) void refreshInfo(root);
   }, []); // Load the remembered repository once.
 
+  useEffect(() => {
+    if (!workspaceDirty) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeLeaving);
+    return () => window.removeEventListener('beforeunload', warnBeforeLeaving);
+  }, [workspaceDirty]);
+
+  const confirmDiscard = (message: string) => !workspaceDirty || window.confirm(message);
+
+  const changeSection = (next: AppSection) => {
+    if (next === section) return;
+    if (!confirmDiscard('当前页面有未保存修改，确定离开吗？')) return;
+    setWorkspaceDirty(false);
+    setSection(next);
+  };
+
   const chooseRoot = async () => {
+    if (!confirmDiscard('当前页面有未保存修改，确定更换博客目录吗？')) return;
     const selected = await open({ directory: true, multiple: false, title: '选择 Astro 博客目录' });
-    if (typeof selected === 'string') await refreshInfo(selected);
+    if (typeof selected === 'string') {
+      setWorkspaceDirty(false);
+      await refreshInfo(selected);
+    }
   };
 
   const openPreview = async (path = '/') => {
@@ -57,27 +81,26 @@ export default function App() {
       const base = await api.startPreview(root);
       setPreviewUrl(new URL(path.replace(/^\//, ''), base).toString());
     } catch (reason) {
-      setPreviewError(String(reason));
+      setPreviewError(getErrorMessage(reason, '无法启动网站预览'));
     } finally {
       setPreviewLoading(false);
     }
   };
 
-  const closePreview = async () => {
+  const closePreview = useCallback(async () => {
     setPreviewPath(null);
     setPreviewUrl(null);
     await api.stopPreview().catch(() => undefined);
-  };
+  }, []);
 
   if (!info) {
     return (
       <main className="connect-screen">
         <div className="connect-card">
           <div className="app-logo">P</div>
-          <p className="eyebrow">BLOG PUBLISHER</p>
           <h1>连接你的 Astro 博客</h1>
           <p>选择包含 package.json 和 src/content/posts 的项目目录。路径只保存在这台电脑上。</p>
-          {error && <div className="callout error">{error}</div>}
+          {error && <div className="callout error" role="alert">{error}</div>}
           <button className="primary large" onClick={chooseRoot} disabled={loading}>
             {loading ? <LoaderCircle className="spin" size={19} /> : <FolderOpen size={19} />}
             {loading ? '正在检查…' : '选择博客目录'}
@@ -90,26 +113,34 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar active={section} onChange={setSection} />
-      <main className="app-main">
+      <Sidebar active={section} onChange={changeSection} />
+      <main className={`app-main${error ? ' has-app-alert' : ''}`}>
         <header className="topbar">
           <div>
             <strong>Blog Publisher</strong>
-            <span>{info.name}</span>
+            <span className="repo-name" title={info.name}>{info.name}</span>
           </div>
           <div className="repo-status">
             <span className={`status-dot ${info.releaseBranch ? 'green' : 'amber'}`} />
-            <span>{info.branch}</span>
-            <button className="ghost" onClick={() => refreshInfo()}><RotateCw size={15} />刷新状态</button>
+            <span className="repo-branch" title={info.branch}>{info.branch}</span>
+            <button className="ghost" onClick={() => refreshInfo()} disabled={loading} aria-busy={loading}>
+              {loading ? <LoaderCircle className="spin" size={15} /> : <RotateCw size={15} />}
+              {loading ? '正在刷新' : '刷新状态'}
+            </button>
           </div>
         </header>
+        {error && (
+          <div className="app-alert callout error" role="alert">
+            <span>{error}</span>
+            <button type="button" onClick={() => setError('')} aria-label="关闭错误提示">关闭</button>
+          </div>
+        )}
         <div className="workspace">
-          {section === 'articles' && <ArticleWorkspace root={root} onPreview={openPreview} onSaved={refreshInfo} />}
-          {section === 'home' && <HomeWorkspace root={root} onPreview={openPreview} onSaved={refreshInfo} />}
+          {section === 'articles' && <ArticleWorkspace root={root} onPreview={openPreview} onSaved={refreshInfo} onDirtyChange={setWorkspaceDirty} />}
+          {section === 'home' && <HomeWorkspace root={root} onPreview={openPreview} onSaved={refreshInfo} onDirtyChange={setWorkspaceDirty} />}
           {section === 'publish' && <PublishCenter root={root} info={info} onRefresh={refreshInfo} />}
           {section === 'settings' && (
             <section className="settings-page page-pad">
-              <p className="eyebrow">设置</p>
               <h1>博客目录</h1>
               <div className="settings-card">
                 <span>当前目录</span><code>{root}</code>

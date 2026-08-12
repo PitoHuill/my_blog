@@ -23,7 +23,6 @@ const href = (path: string) => localizedPath(path, locale);
   counterpartUrl={localizedPath('about/', locale === 'en' ? 'zh' : 'en')}
 >
   <section class="shell about">
-    <p class="eyebrow">{locale === 'en' ? 'ABOUT' : '关于'}</p>
     <h1>{labels.greeting} {profile.name}{locale === 'en' ? '.' : '。'}</h1>
     <p class="lead">{profile.tagline[locale]}</p>
     <div class="rule"></div>
@@ -37,5 +36,5 @@ const href = (path: string) => localizedPath(path, locale);
 </BaseLayout>
 
 <style>
-  .about{max-width:740px;padding-top:55px}.about h1{font:2.35rem/1.35 Georgia}.about h2{font:1.25rem Georgia;margin-top:2.5rem}.about p{line-height:2}.lead{color:var(--color-muted);font-size:1.1rem}.rule{border-top:1px solid var(--color-border);margin:2rem 0}
+  .about{max-width:740px;padding-top:55px}.about h1{font:2.35rem/1.35 Georgia,"Noto Serif SC",serif;letter-spacing:-.02em;text-wrap:balance;margin:0 0 12px}.about h2{font:1.25rem Georgia,"Noto Serif SC",serif;margin-top:2.5rem}.about p{line-height:2;overflow-wrap:anywhere}.lead{color:var(--color-muted);font-size:1.1rem}.rule{border-top:1px solid var(--color-border);margin:2rem 0}@media(max-width:767px){.about{padding-top:40px}.about h1{font-size:1.9rem}.about h2{margin-top:2rem}.lead{font-size:1rem}}
 </style>
