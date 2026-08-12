@@ -2,14 +2,14 @@
 name: Personal Blog Publishing System
 description: "以沉静研究档案为品牌，以出版工作台为操作界面的双模式设计系统。"
 colors:
-  brand-accent: "#347966"
+  brand-accent: "#327562"
   brand-accent-hover: "#2b6656"
   brand-accent-dark: "#7eaf9d"
   warm-paper: "#f7f5f0"
   paper-white: "#ffffff"
   warm-border: "#dedbd3"
   ink: "#282721"
-  stone-muted: "#77746d"
+  stone-muted: "#6d6a63"
   soft-paper: "#efede7"
   night-charcoal: "#171b22"
   night-surface: "#20252e"
