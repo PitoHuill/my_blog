@@ -28,7 +28,6 @@ const articleLabel = (count: number) => count === 1 ? labels.article : labels.ar
   counterpartUrl={localizedPath('series/', locale === 'en' ? 'zh' : 'en')}
 >
   <section class="shell series-index">
-    <p class="eyebrow">{labels.eyebrow}</p>
     <div class="series-intro">
       <div>
         <h1>{labels.title}</h1>
@@ -38,8 +37,8 @@ const articleLabel = (count: number) => count === 1 ? labels.article : labels.ar
     </div>
 
     <div class="series-grid">
-      {series.map((item) => (
-        <article class="series-card card">
+      {series.length ? series.map((item) => (
+        <article class="series-card">
           <div class="series-card__meta">
             <span>{item.posts.length} {articleLabel(item.posts.length)}</span>
             <span>{labels.latestUpdate} · {formatDate(item.latestDate)}</span>
@@ -53,11 +52,11 @@ const articleLabel = (count: number) => count === 1 ? labels.article : labels.ar
             {labels.chapters} →
           </a>
         </article>
-      ))}
+      )) : <p class="empty-state">{locale === 'en' ? 'No article series have been published yet.' : '暂时还没有已发布的文章系列。'}</p>}
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .series-index{max-width:900px;padding-top:55px}.series-intro{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:30px}.series-intro h1{font:2.2rem Georgia,"Noto Serif SC",serif;margin:.35rem 0}.series-intro p{max-width:580px;color:var(--color-muted);margin-bottom:0}.series-intro>span{white-space:nowrap;color:var(--color-accent);font:1rem Georgia,"Noto Serif SC",serif}.series-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.series-card{padding:24px;display:flex;flex-direction:column;min-height:270px}.series-card__meta{display:flex;justify-content:space-between;gap:12px;color:var(--color-muted);font-size:.76rem}.series-card h2{font:1.35rem/1.4 Georgia,"Noto Serif SC",serif;margin:1.1rem 0 .65rem}.series-card h2 a{color:var(--color-text)}.series-card>p{color:var(--color-muted);font-size:.88rem;line-height:1.7;margin:0}.series-card ol{padding-left:1.25rem;margin:1.1rem 0;color:var(--color-muted);font-size:.82rem;line-height:1.7}.series-card__link{margin-top:auto;font-size:.84rem}@media(max-width:700px){.series-index{padding-top:32px}.series-intro{align-items:start;flex-direction:column}.series-grid{grid-template-columns:1fr}.series-card{min-height:0}}
+  .series-index{max-width:900px;padding-top:64px}.series-intro{display:flex;align-items:end;justify-content:space-between;gap:32px;margin-bottom:40px}.series-intro h1{font:2.35rem/1.25 Georgia,"Noto Serif SC",serif;letter-spacing:-.02em;margin:0 0 12px}.series-intro p{max-width:580px;color:var(--color-muted);line-height:1.7;margin:0}.series-intro>span{white-space:nowrap;color:var(--color-accent);font:1rem Georgia,"Noto Serif SC",serif}.series-grid{border-top:1px solid var(--color-border)}.empty-state{margin:0;padding:32px 0;color:var(--color-muted);line-height:1.7}.series-card{display:grid;grid-template-columns:160px minmax(0,1fr) 120px;gap:24px;padding:28px 0;border-bottom:1px solid var(--color-border)}.series-card__meta{display:grid;align-content:start;gap:6px;color:var(--color-muted);font-size:.76rem;font-variant-numeric:tabular-nums}.series-card h2{font:1.4rem/1.4 Georgia,"Noto Serif SC",serif;margin:0 0 8px}.series-card h2 a{color:var(--color-text)}.series-card>p{grid-column:2;max-width:60ch;color:var(--color-muted);font-size:.88rem;line-height:1.7;margin:0}.series-card ol{grid-column:2;margin:12px 0 0;padding-left:1.2rem;color:var(--color-muted);font-size:.82rem;line-height:1.75}.series-card__link{grid-column:3;grid-row:1/4;align-self:center;justify-self:end;font-size:.84rem}@media(max-width:767px){.series-index{padding-top:40px}.series-intro{align-items:start;flex-direction:column;gap:12px}.series-intro h1{font-size:1.9rem}.series-card{grid-template-columns:1fr;gap:10px;padding:24px 0}.series-card__meta{display:flex;flex-wrap:wrap;gap:8px 16px}.series-card>p,.series-card ol,.series-card__link{grid-column:1}.series-card__link{grid-row:auto;justify-self:start;min-height:44px;display:flex;align-items:center}}
 </style>

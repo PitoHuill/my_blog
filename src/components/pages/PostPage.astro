@@ -45,52 +45,60 @@ const seriesText = post.data.series
   counterpartUrl={counterpartUrl}
 >
   <article class="shell article">
-    <a class="back" href={href('posts/')}>← {labels.backToPosts}</a>
-    <p class="eyebrow">{locale === 'en' ? 'ARTICLE' : '文章'}</p>
-    <h1>{post.data.title}</h1>
-    <div class="meta">
-      {labels.published}{labelSeparator}{formatDate(post.data.pubDate)} · {labels.readingTime}{labelSeparator}{readingTime} {labels.minute}
-      {post.data.tags.map((tag) => (
-        <a class="tag" href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`}>{tag}</a>
-      ))}
+    <header class="article-header">
+      <a class="back" href={href('posts/')}>← {labels.backToPosts}</a>
+      <h1>{post.data.title}</h1>
+      <div class="meta">
+        {labels.published}{labelSeparator}{formatDate(post.data.pubDate)} · {labels.readingTime}{labelSeparator}{readingTime} {labels.minute}
+        {post.data.tags.map((tag) => (
+          <a class="tag" href={`${href('posts/')}?tag=${encodeURIComponent(tag)}`}>{tag}</a>
+        ))}
+      </div>
+      {post.data.updatedDate && <div class="meta">{labels.updated}{labelSeparator}{formatDate(post.data.updatedDate)}</div>}
+      {seriesText && (
+        <p class="series-note">
+          {post.data.seriesKey
+            ? <a href={href(`series/${post.data.seriesKey}/`)}>{seriesText}</a>
+            : seriesText}
+        </p>
+      )}
+      <p class="lead">{post.data.description}</p>
+    </header>
+
+    <div class="article-layout">
+      <aside class="toc-rail"><TableOfContents headings={headings} locale={locale} /></aside>
+      <div class="article-body">
+        <div class="article-content"><Content /></div>
+        <hr />
+        <nav class="article-nav" aria-label={locale === 'en' ? 'Article navigation' : '文章导航'}>
+          {previous
+            ? <a href={href(`posts/${getPublicSlug(previous.id)}/`)}>← {labels.previous}<br /><b>{previous.data.title}</b></a>
+            : <span />}
+          {next
+            ? <a href={href(`posts/${getPublicSlug(next.id)}/`)}>{labels.next} →<br /><b>{next.data.title}</b></a>
+            : <span />}
+        </nav>
+        {relatedPosts.length > 0 && (
+          <section class="related" aria-labelledby="related-heading">
+            <h2 class="section-heading" id="related-heading">{labels.relatedPosts}</h2>
+            <div class="related-grid">
+              {relatedPosts.map((related) => (
+                <article class="related-card">
+                  <div class="meta">{formatDate(related.data.pubDate)}</div>
+                  <h3><a href={href(`posts/${getPublicSlug(related.id)}/`)}>{related.data.title}</a></h3>
+                  <p>{related.data.description}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </div>
-    {post.data.updatedDate && <div class="meta">{labels.updated}{labelSeparator}{formatDate(post.data.updatedDate)}</div>}
-    {seriesText && (
-      <p class="series-note">
-        {post.data.seriesKey
-          ? <a href={href(`series/${post.data.seriesKey}/`)}>{seriesText}</a>
-          : seriesText}
-      </p>
-    )}
-    <p class="lead">{post.data.description}</p>
-    <TableOfContents headings={headings} locale={locale} />
-    <div class="article-content"><Content /></div>
-    <hr />
-    <nav class="article-nav" aria-label={locale === 'en' ? 'Article navigation' : '文章导航'}>
-      {previous
-        ? <a href={href(`posts/${getPublicSlug(previous.id)}/`)}>← {labels.previous}<br /><b>{previous.data.title}</b></a>
-        : <span />}
-      {next
-        ? <a href={href(`posts/${getPublicSlug(next.id)}/`)}>{labels.next} →<br /><b>{next.data.title}</b></a>
-        : <span />}
-    </nav>
-    {relatedPosts.length > 0 && (
-      <section class="related" aria-labelledby="related-heading">
-        <div class="section-heading" id="related-heading">{labels.relatedPosts}</div>
-        <div class="related-grid">
-          {relatedPosts.map((related) => (
-            <article class="related-card card">
-              <div class="meta">{formatDate(related.data.pubDate)}</div>
-              <h2><a href={href(`posts/${getPublicSlug(related.id)}/`)}>{related.data.title}</a></h2>
-              <p>{related.data.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-    )}
   </article>
 </BaseLayout>
 
 <style>
-  .article{max-width:740px;padding-top:54px}.back{font-size:.85rem}.article h1{font:2.35rem/1.3 Georgia,"Noto Serif SC",serif;margin:.7rem 0}.series-note{display:inline-block;margin:1rem 0 0;padding:.35rem .65rem;background:var(--color-soft);border:1px solid var(--color-border);border-radius:4px;color:var(--color-muted);font-size:.82rem}.series-note a{color:var(--color-accent)}.lead{font-size:1.1rem;color:var(--color-muted);border-left:2px solid var(--color-accent);padding-left:16px}.article hr{border:0;border-top:1px solid var(--color-border);margin:3rem 0}.article-nav{display:grid;grid-template-columns:1fr 1fr;gap:20px}.article-nav a:last-child{text-align:right}.article-nav b{font:1rem Georgia;color:var(--color-text)}.related{margin-top:3.5rem}.related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.related-card{padding:16px}.related-card h2{font:1rem/1.45 Georgia,"Noto Serif SC",serif;margin:.55rem 0}.related-card h2 a{color:var(--color-text)}.related-card p{color:var(--color-muted);font-size:.78rem;line-height:1.6;margin:0}@media(max-width:767px){.article{padding-top:32px}.article h1{font-size:1.8rem}.related-grid{grid-template-columns:1fr}.related-card p{font-size:.84rem}}
+  .article{max-width:1020px;padding-top:64px}.article-header{max-width:720px;margin:0 0 40px}.back{display:inline-flex;align-items:center;min-height:44px;font-size:.85rem}.article h1{font:2.55rem/1.25 Georgia,"Noto Serif SC",serif;letter-spacing:-.025em;text-wrap:balance;margin:20px 0 16px}.series-note{display:inline-block;margin:16px 0 0;padding:7px 10px;background:var(--color-soft);border:1px solid var(--color-border);border-radius:4px;color:var(--color-muted);font-size:.82rem}.series-note a{color:var(--color-accent)}.lead{max-width:65ch;margin:24px 0 0;padding-top:20px;border-top:1px solid var(--color-border);color:var(--color-muted);font:1.08rem/1.75 Georgia,"Noto Serif SC",serif}.article-layout{display:grid;grid-template-columns:minmax(0,720px) 220px;grid-template-areas:"body toc";justify-content:center;gap:64px;align-items:start}.article-body{grid-area:body;min-width:0}.toc-rail{grid-area:toc;position:sticky;top:88px;min-width:0}.article hr{border:0;border-top:1px solid var(--color-border);margin:48px 0}.article-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.article-nav a{min-width:0;overflow-wrap:anywhere;color:var(--color-muted);line-height:1.55}.article-nav a:last-child{text-align:right}.article-nav b{color:var(--color-text);font:1rem Georgia,"Noto Serif SC",serif}.related{margin-top:64px}.related-grid{border-top:1px solid var(--color-border)}.related-card{padding:20px 0;border-bottom:1px solid var(--color-border)}.related-card h3{font:1.05rem/1.45 Georgia,"Noto Serif SC",serif;margin:6px 0}.related-card h3 a{color:var(--color-text)}.related-card p{max-width:62ch;color:var(--color-muted);font-size:.84rem;line-height:1.65;margin:0}@media(max-width:767px){.article{padding-top:40px}.article-header{margin-bottom:32px}.article h1{font-size:1.9rem}.article-layout{grid-template-columns:1fr;grid-template-areas:"toc" "body";gap:24px}.toc-rail{position:static}.article-nav{grid-template-columns:1fr}.article-nav a:last-child{text-align:left}.article-nav span:empty{display:none}.related{margin-top:48px}}
+  .article{max-width:1004px}
+  @media(max-width:1023px){.article-layout{grid-template-columns:minmax(0,720px);grid-template-areas:"toc" "body";gap:28px}.toc-rail{position:static}.table-of-contents{max-width:720px}.article-body>:first-child{margin-top:0}}
 </style>

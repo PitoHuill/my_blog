@@ -20,19 +20,23 @@ const href = (path: string) => localizedPath(path, locale);
   counterpartUrl={localizedPath('projects/', locale === 'en' ? 'zh' : 'en')}
 >
   <section class="shell listing">
-    <p class="eyebrow">{locale === 'en' ? 'PROJECTS' : '项目'}</p>
     <h1>{labels.title}</h1>
     <p class="intro">{labels.description}</p>
-    {projects.map((project) => (
-      <article class="entry card">
-        <h2><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h2>
-        <div class="meta">{project.year} · {project.status[locale]}</div>
-        <p>{project.description[locale]}</p>
-      </article>
-    ))}
+    <div class="entry-list">
+      {projects.length ? projects.map((project) => (
+        <article class="entry">
+          <div class="project-state"><b>{project.year}</b><span>{project.status[locale]}</span></div>
+          <div>
+            <h2><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h2>
+            <p>{project.description[locale]}</p>
+          </div>
+          <span class="entry-link" aria-hidden="true">→</span>
+        </article>
+      )) : <p class="empty-state">{locale === 'en' ? 'No public projects yet.' : '暂时还没有公开项目。'}</p>}
+    </div>
   </section>
 </BaseLayout>
 
 <style>
-  .listing{max-width:760px;padding-top:55px}.listing h1{font:2.2rem Georgia;margin:.35rem 0}.intro,.entry p{color:var(--color-muted)}.entry{padding:21px;margin:12px 0}.entry h2{font:1.15rem Georgia;margin:0 0 .6rem}.entry h2 a{color:var(--color-text)}.entry p{line-height:1.65}
+  .listing{max-width:900px;padding-top:64px}.listing h1{font:2.35rem/1.25 Georgia,"Noto Serif SC",serif;letter-spacing:-.02em;margin:0 0 12px}.intro{max-width:62ch;margin:0;color:var(--color-muted);line-height:1.7}.entry-list{margin-top:40px;border-top:1px solid var(--color-border)}.empty-state{margin:0;padding:32px 0;color:var(--color-muted);line-height:1.7}.entry{display:grid;grid-template-columns:112px minmax(0,1fr) 32px;gap:24px;align-items:start;padding:28px 0;border-bottom:1px solid var(--color-border)}.project-state{display:grid;gap:4px;color:var(--color-muted);font-size:.78rem}.project-state b{color:var(--color-accent);font:1.05rem Georgia,"Noto Serif SC",serif}.entry h2{font:1.25rem/1.45 Georgia,"Noto Serif SC",serif;margin:0}.entry h2 a{color:var(--color-text)}.entry p{max-width:60ch;margin:8px 0 0;color:var(--color-muted);line-height:1.7}.entry-link{display:grid;place-items:center;min-width:32px;min-height:44px}@media(max-width:767px){.listing{padding-top:40px}.listing h1{font-size:1.9rem}.entry{grid-template-columns:1fr 32px;gap:10px 16px}.project-state{grid-column:1/-1;display:flex;gap:8px}.entry-link{grid-column:2;grid-row:2}}
 </style>

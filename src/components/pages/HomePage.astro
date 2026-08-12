@@ -35,7 +35,7 @@ const sectionConfig = (id: string) => {
   counterpartUrl={counterpartUrl}
 >
   <div class="shell home-grid">
-    <aside>
+    <aside class="profile-rail">
       {homeConfig.sidebar.profile && (
         <section class="profile card">
           <Image
@@ -56,37 +56,22 @@ const sectionConfig = (id: string) => {
           </div>
         </section>
       )}
-      {homeConfig.sidebar.stats && (
-        <section class="stats card">
-          <div><b>{posts.length}</b><span>{labels.home.posts}</span></div>
-          <div><b>{projects.length}</b><span>{labels.home.projects}</span></div>
-          <div><b>3</b><span>{labels.home.works}</span></div>
-        </section>
-      )}
-      {homeConfig.sidebar.links && (
-        <section class="sidebar-card card">
-          <h2>{labels.home.links}</h2>
-          <a href={href('about/')}>{labels.home.aboutMe} →</a>
-          <a href={href('series/')}>{labels.home.series} →</a>
-          <a href={href('projects/')}>{labels.home.allProjects} →</a>
-          <a href={href('rss.xml')}>{labels.home.rss} →</a>
-        </section>
-      )}
     </aside>
 
     <section class="home-main">
-      {sectionConfig('featured').visible && featured && (
+      {sectionConfig('featured').visible && (
         <div class="home-section" style={`order:${sectionConfig('featured').order}`}>
-          <div class="section-heading">{labels.home.featuredPosts}</div>
-          <article class="post-card feature card">
-            <span class="eyebrow">{labels.home.featured.toUpperCase()}</span>
-            <h2><a href={href(`posts/${getPublicSlug(featured.id)}/`)}>{featured.data.title}</a></h2>
-            <div class="meta">
-              {formatDate(featured.data.pubDate)}
-              {featured.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-            </div>
-            <p>{featured.data.description}</p>
-          </article>
+          <h2 class="section-heading">{labels.home.featuredPosts}</h2>
+          {featured ? (
+            <article class="post-card feature card">
+              <h3><a href={href(`posts/${getPublicSlug(featured.id)}/`)}>{featured.data.title}</a></h3>
+              <div class="meta">
+                {formatDate(featured.data.pubDate)}
+                {featured.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+              </div>
+              <p>{featured.data.description}</p>
+            </article>
+          ) : <p class="home-empty">{locale === 'en' ? 'No featured article yet.' : '暂时还没有精选文章。'}</p>}
         </div>
       )}
 
@@ -100,40 +85,65 @@ const sectionConfig = (id: string) => {
 
       {sectionConfig('latest').visible && (
         <div class="home-section" style={`order:${sectionConfig('latest').order}`}>
-          <div class="section-heading">
+          <h2 class="section-heading">
             {labels.home.latestPosts} <a href={href('posts/')}>{labels.home.allPosts} →</a>
+          </h2>
+          <div class="post-list">
+            {recent.length ? recent.map((post) => (
+              <article class="post-row">
+                <div class="post-row__date">{formatDate(post.data.pubDate)}</div>
+                <div>
+                  <h3><a href={href(`posts/${getPublicSlug(post.id)}/`)}>{post.data.title}</a></h3>
+                  <p>{post.data.description}</p>
+                  <div class="meta">{post.data.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+                </div>
+              </article>
+            )) : <p class="home-empty">{locale === 'en' ? 'No recent articles yet.' : '暂时还没有最新文章。'}</p>}
           </div>
-          {recent.map((post) => (
-            <article class="post-card card">
-              <h2><a href={href(`posts/${getPublicSlug(post.id)}/`)}>{post.data.title}</a></h2>
-              <div class="meta">
-                {formatDate(post.data.pubDate)}
-                {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-              </div>
-              <p>{post.data.description}</p>
-            </article>
-          ))}
         </div>
       )}
 
       {sectionConfig('projects').visible && (
         <div class="home-section" style={`order:${sectionConfig('projects').order}`}>
-          <div class="section-heading project-heading">
+          <h2 class="section-heading project-heading">
             {labels.home.projects} <a href={href('projects/')}>{labels.home.allProjects} →</a>
+          </h2>
+          <div class="project-grid">
+            {projects.length ? projects.slice(0, 2).map((project) => (
+              <article class="project-item">
+                <div class="meta">{project.year} · {project.status[locale]}</div>
+                <h3><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h3>
+                <p>{project.description[locale]}</p>
+              </article>
+            )) : <p class="home-empty">{locale === 'en' ? 'No public projects yet.' : '暂时还没有公开项目。'}</p>}
           </div>
-          {projects.slice(0, 2).map((project) => (
-            <article class="post-card card">
-              <h2><a href={href(`projects/${project.slug}/`)}>{project.title[locale]}</a></h2>
-              <div class="meta">{project.year} · {project.status[locale]}</div>
-              <p>{project.description[locale]}</p>
-            </article>
-          ))}
         </div>
       )}
     </section>
+
+    <aside class="resource-rail">
+      {homeConfig.sidebar.stats && (
+        <section class="stats" aria-label={locale === 'en' ? 'Archive statistics' : '档案统计'}>
+          <div><b>{posts.length}</b><span>{labels.home.posts}</span></div>
+          <div><b>{projects.length}</b><span>{labels.home.projects}</span></div>
+          <div><b>3</b><span>{labels.home.works}</span></div>
+        </section>
+      )}
+      {homeConfig.sidebar.links && (
+        <nav class="sidebar-links" aria-label={labels.home.links}>
+          <h2>{labels.home.links}</h2>
+          <a href={href('about/')}>{labels.home.aboutMe}<span>→</span></a>
+          <a href={href('series/')}>{labels.home.series}<span>→</span></a>
+          <a href={href('projects/')}>{labels.home.allProjects}<span>→</span></a>
+          <a href={href('rss.xml')}>{labels.home.rss}<span>→</span></a>
+        </nav>
+      )}
+    </aside>
   </div>
 </BaseLayout>
 
 <style>
-  .home-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:32px;padding-top:34px}.home-main{display:flex;flex-direction:column}.profile,.sidebar-card{padding:22px}.avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;margin:auto;background:linear-gradient(140deg,var(--color-accent),var(--color-soft));color:white;font-family:Georgia}.profile h1{text-align:center;font:1.3rem Georgia;margin:12px 0 8px}.profile p{color:var(--color-muted);font-size:.85rem;line-height:1.7;text-align:center}.social{display:flex;justify-content:center;gap:14px;font-size:.8rem}.stats{display:grid;grid-template-columns:repeat(3,1fr);padding:17px;margin-top:14px;text-align:center}.stats b{display:block;color:var(--color-accent);font:1.35rem Georgia}.stats span{font-size:.75rem;color:var(--color-muted)}.sidebar-card{margin-top:14px}.sidebar-card h2{font:1rem Georgia;margin:0 0 .6rem}.sidebar-card a{display:block;padding:.45rem 0;font-size:.85rem}.post-card{padding:20px 21px;margin-bottom:13px;transition:transform .2s,border-color .2s}.post-card:hover{transform:translateY(-2px);border-color:var(--color-accent)}.post-card h2{margin:.1rem 0 .65rem;font:1.08rem/1.45 Georgia,"Noto Serif SC",serif}.post-card h2 a{color:var(--color-text)}.post-card p{margin:.8rem 0 0;color:var(--color-muted);font-size:.88rem;line-height:1.7}.feature h2{font-size:1.25rem}.now{display:flex;gap:13px;align-items:center;padding:15px 18px;margin:25px 0;border-left:2px solid var(--color-accent);color:var(--color-muted);font-size:.88rem}.now b{color:var(--color-text);font-family:Georgia}.now em{margin-left:auto;color:var(--color-accent);font-style:normal}.project-heading{margin-top:32px}@media(max-width:767px){.home-grid{grid-template-columns:1fr;padding-top:20px}.home-grid aside{display:grid;grid-template-columns:1fr 1fr;gap:12px}.profile{grid-column:1/-1}.stats,.sidebar-card{margin:0}}
+  .home-grid{display:grid;grid-template-columns:260px minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"profile main" "resources main";align-items:start;gap:24px 48px;padding-top:48px}.profile-rail{grid-area:profile}.home-main{grid-area:main;display:flex;min-width:0;flex-direction:column}.resource-rail{grid-area:resources;display:grid;gap:28px}.profile{padding:24px}.avatar{width:72px;height:72px;display:block;margin:auto;border-radius:50%}.profile h1{text-align:center;font:1.4rem/1.3 Georgia,"Noto Serif SC",serif;margin:16px 0 8px}.profile p{color:var(--color-muted);font-size:.86rem;line-height:1.75;text-align:center}.social{display:flex;justify-content:center;gap:16px;margin-top:16px;font-size:.82rem}.stats{display:grid;grid-template-columns:repeat(3,1fr);padding:20px 0;border-block:1px solid var(--color-border);text-align:center}.stats div+div{border-left:1px solid var(--color-border)}.stats b{display:block;color:var(--color-accent);font:1.35rem Georgia,"Noto Serif SC",serif}.stats span{display:block;margin-top:4px;color:var(--color-muted);font-size:.75rem}.sidebar-links h2{font:1rem Georgia,"Noto Serif SC",serif;margin:0 0 8px}.sidebar-links a{display:flex;align-items:center;justify-content:space-between;min-height:44px;border-bottom:1px solid var(--color-border);font-size:.85rem}.sidebar-links a span{color:var(--color-muted)}.home-section{margin-bottom:48px}.home-empty{margin:0;padding:28px 0;border-block:1px solid var(--color-border);color:var(--color-muted);line-height:1.7}.feature{padding:28px 30px;border:0;border-radius:12px;box-shadow:0 16px 36px rgba(36,45,42,.08);transition:transform .18s ease-out,box-shadow .18s ease-out}.feature:hover{transform:translateY(-2px);box-shadow:0 20px 42px rgba(36,45,42,.12)}.feature h3{max-width:22ch;margin:0 0 12px;font:1.75rem/1.35 Georgia,"Noto Serif SC",serif;letter-spacing:-.015em;text-wrap:balance}.feature h3 a,.post-row h3 a,.project-item h3 a{color:var(--color-text)}.feature p{max-width:62ch;margin:16px 0 0;color:var(--color-muted);font-size:.94rem;line-height:1.75}.now{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;min-height:56px;padding:0 4px;border-block:1px solid var(--color-border);color:var(--color-muted);font-size:.88rem}.now b{color:var(--color-text);font-family:Georgia,"Noto Serif SC",serif}.now span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.now em{color:var(--color-accent);font-style:normal}.post-list{border-top:1px solid var(--color-border)}.post-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:24px;padding:22px 0;border-bottom:1px solid var(--color-border)}.post-row__date{padding-top:4px;color:var(--color-muted);font-size:.78rem;font-variant-numeric:tabular-nums}.post-row h3,.project-item h3{margin:0;font:1.12rem/1.45 Georgia,"Noto Serif SC",serif}.post-row p,.project-item p{margin:8px 0;color:var(--color-muted);font-size:.88rem;line-height:1.7}.post-row .tag:first-child{margin-left:0}.project-heading{margin-top:8px}.project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;border-top:1px solid var(--color-border)}.project-grid>.home-empty{grid-column:1/-1}.project-item{padding:22px 0;border-bottom:1px solid var(--color-border)}.project-item .meta{margin-bottom:8px}@media(max-width:767px){.home-grid{grid-template-columns:1fr;grid-template-rows:auto;grid-template-areas:"profile" "main" "resources";gap:32px;padding-top:24px}.profile{display:grid;grid-template-columns:64px minmax(0,1fr);column-gap:16px;text-align:left}.avatar{grid-row:1/4;width:64px;height:64px}.profile h1,.profile p{text-align:left}.profile h1{margin:2px 0 4px}.profile p{margin:0}.social{justify-content:flex-start;margin-top:10px}.home-section{margin-bottom:40px}.feature{padding:24px}.feature h3{font-size:1.45rem}.post-row{grid-template-columns:1fr;gap:6px;padding:20px 0}.project-grid{grid-template-columns:1fr;gap:0}.resource-rail{gap:24px}.now{grid-template-columns:auto minmax(0,1fr) auto}.now span{white-space:normal}.sidebar-links a{min-height:48px}}
+  @media(min-width:768px) and (max-width:1023px){.home-grid{grid-template-columns:220px minmax(0,1fr);gap:24px 32px;padding-top:36px}.profile{padding:20px}.feature{padding:26px}.project-grid{grid-template-columns:1fr;gap:0}}
+  @media(hover:none){.feature:hover{transform:none;box-shadow:0 16px 36px rgba(36,45,42,.08)}}
 </style>

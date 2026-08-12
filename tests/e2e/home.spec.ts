@@ -89,7 +89,6 @@ test('search pages expose accessible language controls for equivalent routes', a
 
 test('search datasets, labels, results, and post links stay within the active locale', async ({ page }) => {
   await page.goto('/search/');
-  await expect(page.locator('.search-page .eyebrow')).toHaveText('SEARCH');
   await expect(page.getByRole('heading', { level: 1, name: 'Search posts' })).toBeVisible();
   const englishInput = page.getByRole('searchbox', { name: 'Enter a keyword' });
   await expect(englishInput).toHaveAttribute('placeholder', 'Title, description, or tag');
@@ -102,7 +101,6 @@ test('search datasets, labels, results, and post links stay within the active lo
   await expect(page.getByText('从零搭建一个可长期维护的个人博客')).toHaveCount(0);
 
   await page.goto('/zh/search/');
-  await expect(page.locator('.search-page .eyebrow')).toHaveText('搜索');
   await expect(page.getByRole('heading', { level: 1, name: '搜索文章' })).toBeVisible();
   const chineseInput = page.getByRole('searchbox', { name: '输入关键词' });
   await expect(chineseInput).toHaveAttribute('placeholder', '标题、摘要或标签');
@@ -167,6 +165,70 @@ test('English header remains usable without horizontal overflow at 320px', async
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(320);
   }
+});
+
+test('representative pages adapt cleanly at mobile, tablet, and compact desktop widths', async ({ page }) => {
+  const mobileRoutes = [
+    '/',
+    '/posts/',
+    '/posts/building-a-lasting-blog/',
+    '/projects/',
+    '/projects/knowledge-garden/',
+    '/series/',
+    '/series/astro-blog-practice/',
+    '/search/',
+    '/about/',
+  ];
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  for (const route of mobileRoutes) {
+    await page.goto(route);
+    await expect.poll(
+      () => page.evaluate(() => document.documentElement.scrollWidth),
+      { message: `${route} should not overflow at 320px` },
+    ).toBeLessThanOrEqual(320);
+  }
+
+  await page.goto('/');
+  const profile = page.locator('.profile-rail');
+  const main = page.locator('.home-main');
+  const resources = page.locator('.resource-rail');
+  const [profileBox, mainBox, resourceBox] = await Promise.all([
+    profile.boundingBox(),
+    main.boundingBox(),
+    resources.boundingBox(),
+  ]);
+  expect(profileBox).not.toBeNull();
+  expect(mainBox).not.toBeNull();
+  expect(resourceBox).not.toBeNull();
+  expect(profileBox!.y).toBeLessThan(mainBox!.y);
+  expect(mainBox!.y).toBeLessThan(resourceBox!.y);
+
+  for (const control of await page.locator('.site-header nav a, .theme-toggle, .language-toggle').all()) {
+    const box = await control.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+  }
+
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/posts/building-a-lasting-blog/');
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(768);
+  await expect(page.locator('.article-layout')).toHaveCSS('grid-template-areas', '"toc" "body"');
+  await expect(page.locator('.toc-rail')).toHaveCSS('position', 'static');
+
+  await page.setViewportSize({ width: 1100, height: 720 });
+  for (const route of ['/', '/posts/building-a-lasting-blog/', '/projects/']) {
+    await page.goto(route);
+    await expect.poll(
+      () => page.evaluate(() => document.documentElement.scrollWidth),
+      { message: `${route} should not overflow at 1100px` },
+    ).toBeLessThanOrEqual(1100);
+  }
+
+  await expect(page.locator('meta[name="viewport"]')).toHaveAttribute(
+    'content',
+    'width=device-width, initial-scale=1, viewport-fit=cover',
+  );
 });
 
 test('language controls preserve equivalent home, post, project, and about routes', async ({ page }) => {

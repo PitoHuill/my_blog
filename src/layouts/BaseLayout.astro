@@ -24,7 +24,7 @@ const chineseUrl = locale === 'zh' ? canonicalUrl : counterpartAbsoluteUrl;
 <html lang={locale === 'en' ? 'en' : 'zh-CN'}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
     <link rel="canonical" href={canonicalUrl} />
     {englishUrl && <link rel="alternate" hreflang="en" href={englishUrl} />}
@@ -37,8 +37,9 @@ const chineseUrl = locale === 'zh' ? canonicalUrl : counterpartAbsoluteUrl;
     <script is:inline>const t=localStorage.getItem('theme');document.documentElement.dataset.theme=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');</script>
   </head>
   <body>
+    <a class="skip-link" href="#content">{locale === 'en' ? 'Skip to main content' : '跳到正文'}</a>
     <Header locale={locale} counterpartUrl={counterpartUrl} />
-    <main id="content"><slot /></main>
+    <main id="content" tabindex="-1"><slot /></main>
     <Footer locale={locale} />
   </body>
 </html>

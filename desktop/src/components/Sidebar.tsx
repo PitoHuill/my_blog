@@ -13,9 +13,9 @@ export function Sidebar({ active, onChange }: { active: AppSection; onChange: (v
   return (
     <aside className="app-sidebar">
       <div className="app-mark">P</div>
-      <nav>
+      <nav aria-label="应用主导航">
         {items.map(({ id, label, icon: Icon }) => (
-          <button className={active === id ? 'active' : ''} key={id} onClick={() => onChange(id)}>
+          <button className={active === id ? 'active' : ''} key={id} onClick={() => onChange(id)} aria-current={active === id ? 'page' : undefined}>
             <Icon size={21} strokeWidth={1.8} />
             <span>{label}</span>
           </button>
